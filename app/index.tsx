@@ -3,12 +3,18 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { Href, Link } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+	const colorScheme = useColorScheme();
 	return (
-		<SafeAreaView style={styles.root}>
+		<SafeAreaView
+			style={[
+				styles.root,
+				colorScheme === "dark" ? { backgroundColor: "black" } : { backgroundColor: "white" },
+			]}
+		>
 			<View style={styles.header}>
 				<TextHeader>Kassir</TextHeader>
 				<Link href="/setting" asChild>
@@ -69,6 +75,7 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 		paddingHorizontal: 10,
+		backgroundColor: "white",
 	},
 	root: {
 		display: "flex",
