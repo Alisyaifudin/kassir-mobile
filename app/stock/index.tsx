@@ -1,19 +1,14 @@
-import { StyleSheet, Text, useColorScheme, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Link } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function DetailScreen() {
-	const colorScheme = useColorScheme();
 	return (
-		<SafeAreaView
-			style={[
-				styles.root,
-				colorScheme === "dark" ? { backgroundColor: "black" } : { backgroundColor: "white" },
-			]}
-		>
+		<View style={[styles.root]}>
 			<View style={styles.container}>
 				<Text>Stock</Text>
+				<Link href="/stock/new-item">Baru</Link>
 			</View>
-		</SafeAreaView>
+		</View>
 	);
 }
 
@@ -22,7 +17,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	container: {
-		backgroundColor: "white",
-    display
+		display: "flex",
 	},
 });

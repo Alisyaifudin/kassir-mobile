@@ -1,20 +1,21 @@
+import { RootProvider } from "@/components/RootProvider";
+import { migrateDbIfNeeded } from "@/database/migration";
 import { Stack } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
 
 export default function RootLayout() {
 	return (
-		<Stack>
-			<Stack.Screen
-				name="index"
-				options={{
-					headerShown: false,
-				}}
-			/>
-			<Stack.Screen
-				name="stock/index"
-				options={{
-					title: "Stok",
-				}}
-			/>
-		</Stack>
+		<SQLiteProvider databaseName="data.db" onInit={migrateDbIfNeeded}>
+			<RootProvider>
+				<Stack
+					screenOptions={{
+						headerShown: false,
+					}}
+				>
+					<Stack.Screen name="index" />
+					<Stack.Screen name="stock" />
+				</Stack>
+			</RootProvider>
+		</SQLiteProvider>
 	);
 }
