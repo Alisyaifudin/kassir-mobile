@@ -1,8 +1,13 @@
-import { Loader } from "@/components/Loader";
 import { Show } from "@/components/Show";
 import { TextError } from "@/components/TextError";
+import { TopNav } from "@/components/TopNav";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
+import { emitter } from "@/lib/event-emitter";
 import { integer, numeric } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -13,7 +18,8 @@ import {
 	SubmitHandler,
 	useForm,
 } from "react-hook-form";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 
 type Inputs = {
@@ -85,108 +91,99 @@ export default function Page() {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
+			db.product.revalidate("all");
+			emitter.emit("fetch-products");
 			router.navigate("/stock");
 		}
 	};
 	return (
-		<View style={styles.root}>
-			<Field
-				label="Nama*"
-				name="name"
-				control={control}
-				error={{ show: error !== null && error.name !== "", msg: error?.name ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput onBlur={onBlur} onChangeText={onChange} value={value} style={styles.input} />
-				)}
-			</Field>
-			<Field
-				label="Harga*"
-				name="price"
-				control={control}
-				error={{ show: error !== null && error.price !== "", msg: error?.price ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-						keyboardType="numeric"
-						style={styles.input}
-					/>
-				)}
-			</Field>
-			<Field
-				label="Modal"
-				name="capital"
-				control={control}
-				error={{ show: error !== null && error?.capital !== "", msg: error?.capital ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-						keyboardType="numeric"
-						style={styles.input}
-					/>
-				)}
-			</Field>
-			<Field
-				label="Stok*"
-				name="stock"
-				control={control}
-				error={{ show: error !== null && error.stock !== "", msg: error?.stock ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-						keyboardType="numeric"
-						style={[styles.stock]}
-					/>
-				)}
-			</Field>
-			<Field
-				label="Barcode"
-				name="barcode"
-				control={control}
-				error={{ show: error !== null && error.barcode !== "", msg: error?.barcode ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput onBlur={onBlur} onChangeText={onChange} value={value} style={styles.input} />
-				)}
-			</Field>
-			<Field
-				label="Catatan"
-				name="note"
-				control={control}
-				error={{ show: error !== null && error.note !== "", msg: error?.note ?? "" }}
-			>
-				{({ onBlur, onChange, value }) => (
-					<TextInput
-						multiline
-						textAlignVertical="top"
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-						style={styles.note}
-					/>
-				)}
-			</Field>
-			<View style={styles["button-container"]}>
-				<TouchableOpacity onPress={handleSubmit(onSubmit)} style={styles.button}>
-					<Show when={loading}>
-						<Loader />
-					</Show>
-					<Text style={{ color: "white" }}>Simpan</Text>
-				</TouchableOpacity>
+		<SafeAreaView style={styles.root}>
+			<TopNav href="/stock">Barang Baru</TopNav>
+			<View style={styles.container}>
+				<Field
+					label="Nama*"
+					name="name"
+					control={control}
+					error={{ show: error !== null && error.name !== "", msg: error?.name ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					)}
+				</Field>
+				<Field
+					label="Harga*"
+					name="price"
+					control={control}
+					error={{ show: error !== null && error.price !== "", msg: error?.price ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} keyboardType="numeric" />
+					)}
+				</Field>
+				<Field
+					label="Modal"
+					name="capital"
+					control={control}
+					error={{ show: error !== null && error?.capital !== "", msg: error?.capital ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} keyboardType="numeric" />
+					)}
+				</Field>
+				<Field
+					label="Stok*"
+					name="stock"
+					control={control}
+					error={{ show: error !== null && error.stock !== "", msg: error?.stock ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+							keyboardType="numeric"
+							style={styles.stock}
+						/>
+					)}
+				</Field>
+				<Field
+					label="Barcode"
+					name="barcode"
+					control={control}
+					error={{ show: error !== null && error.barcode !== "", msg: error?.barcode ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					)}
+				</Field>
+				<Field
+					label="Catatan"
+					name="note"
+					control={control}
+					error={{ show: error !== null && error.note !== "", msg: error?.note ?? "" }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Textarea
+							textAlignVertical="top"
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+						/>
+					)}
+				</Field>
+				<View style={styles["button-container"]}>
+					<Button onPress={handleSubmit(onSubmit)} style={styles.button}>
+						<Show when={loading}>
+							<ActivityIndicator color="white" />
+						</Show>
+						<Text style={{ color: "white" }}>Simpan</Text>
+					</Button>
+				</View>
+				<Show when={error !== null && error.global !== ""}>
+					<TextError>{error?.global}</TextError>
+				</Show>
 			</View>
-			<Show when={error !== null && error.global !== ""}>
-				<TextError>{error?.global}</TextError>
-			</Show>
-		</View>
+		</SafeAreaView>
 	);
 }
 
@@ -209,7 +206,7 @@ function Field({
 	return (
 		<View style={styles.field}>
 			<View style={styles.label}>
-				<Text>{label}</Text>
+				<Label>{label}</Label>
 			</View>
 			<View style={styles.value}>
 				<Controller control={control} render={({ field }) => children(field)} name={name} />
@@ -222,6 +219,8 @@ function Field({
 const styles = StyleSheet.create({
 	root: {
 		flex: 1,
+	},
+	container: {
 		display: "flex",
 		gap: 10,
 		flexDirection: "column",
@@ -238,17 +237,8 @@ const styles = StyleSheet.create({
 	value: {
 		flex: 1,
 	},
-	input: {
-		width: "100%",
-		borderWidth: 1,
-	},
 	stock: {
 		width: 50,
-		borderWidth: 1,
-	},
-	note: {
-		width: "100%",
-		height: 105,
 		borderWidth: 1,
 	},
 	"button-container": {
@@ -257,12 +247,9 @@ const styles = StyleSheet.create({
 		justifyContent: "flex-end",
 	},
 	button: {
-		padding: 5,
-		borderWidth: 1,
-		backgroundColor: "black",
 		display: "flex",
 		flexDirection: "row",
 		alignItems: "center",
-		gap: 5,
+		gap: 10,
 	},
 });

@@ -19,14 +19,14 @@ export class ProductTable {
 		}
 		const statement = await this.#db.prepareAsync("SELECT * FROM products");
 		try {
-			var res = await statement.executeAsync<DB.Product>();
+			const res = await statement.executeAsync<DB.Product>();
+			var products = await res.getAllAsync();
 		} catch (error) {
 			console.error(error);
 			return err("Aplikasi bermasalah");
 		} finally {
 			await statement.finalizeAsync();
 		}
-		const products = await res.getAllAsync();
 		this.#caches.all = products;
 		return ok(products);
 	}
@@ -43,16 +43,16 @@ export class ProductTable {
 				"SELECT name FROM products WHERE barcode = $barcode"
 			);
 			try {
-				var selectRes = await selectStmt.executeAsync<Pick<DB.Product, "name">>({
+				const selectRes = await selectStmt.executeAsync<Pick<DB.Product, "name">>({
 					$barcode: data.barcode,
 				});
+				var prod = await selectRes.getFirstAsync();
 			} catch (error) {
 				console.error(error);
 				return "Aplikasi bermasalah";
 			} finally {
 				await selectStmt.finalizeAsync();
 			}
-			const prod = await selectRes.getFirstAsync();
 			if (prod === null) {
 				return "Barang sudah ada";
 			}

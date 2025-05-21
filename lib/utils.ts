@@ -1,6 +1,9 @@
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 export const version = "2.12.5";
 
 export const METHODS = ["cash", "transfer", "debit", "qris", "other"] as const;
@@ -162,4 +165,9 @@ export function getBackURL(defaultURL: string, search: URLSearchParams) {
 	const parsed = z.string().safeParse(search.get("url_back"));
 	const urlBack = parsed.success ? parsed.data : defaultURL;
 	return urlBack;
+}
+
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

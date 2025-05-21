@@ -3,16 +3,12 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { Href, Link } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity,  View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
 	return (
-		<SafeAreaView
-			style={[
-				styles.root,
-			]}
-		>
+		<SafeAreaView style={styles.root}>
 			<View style={styles.header}>
 				<TextHeader>Kassir</TextHeader>
 				<Link href="/setting" asChild>

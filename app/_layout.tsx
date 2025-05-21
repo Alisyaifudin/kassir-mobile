@@ -1,7 +1,9 @@
 import { RootProvider } from "@/components/RootProvider";
 import { migrateDbIfNeeded } from "@/database/migration";
+import "@/global.css";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
+import * as React from "react";
 
 export default function RootLayout() {
 	return (
