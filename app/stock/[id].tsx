@@ -1,0 +1,37 @@
+import { Await } from "@/components/Await";
+import { Form } from "@/components/pages/stock/edit";
+import { TopNav } from "@/components/TopNav";
+import { useAsync } from "@/hooks/useAsync";
+import { useDB } from "@/hooks/useDB";
+import { numeric } from "@/lib/utils";
+import { Redirect, useLocalSearchParams } from "expo-router";
+import React from "react";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export default function Page() {
+	const { id: raw } = useLocalSearchParams();
+	const parsed = numeric.safeParse(raw);
+	if (!parsed.success) {
+		return <Redirect href="/stock" />;
+	}
+	const id = parsed.data;
+	return (
+		<SafeAreaView style={styles.root}>
+			<TopNav href="/stock">Edit Barang</TopNav>
+			<Wrapper id={id} />
+		</SafeAreaView>
+	);
+}
+
+function Wrapper({ id }: { id: number }) {
+	const db = useDB();
+	const state = useAsync(() => db.product.getById(id));
+	return <Await state={state}>{(product) => <Form product={product} />}</Await>;
+}
+
+const styles = StyleSheet.create({
+	root: {
+		flex: 1,
+	},
+});

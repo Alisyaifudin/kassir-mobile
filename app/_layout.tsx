@@ -3,7 +3,7 @@ import { migrateDbIfNeeded } from "@/database/migration";
 import "@/global.css";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
-import * as React from "react";
+import { PortalHost } from '@rn-primitives/portal';
 
 export default function RootLayout() {
 	return (
@@ -17,6 +17,7 @@ export default function RootLayout() {
 					<Stack.Screen name="index" />
 					<Stack.Screen name="stock" />
 				</Stack>
+				<PortalHost />
 			</RootProvider>
 		</SQLiteProvider>
 	);

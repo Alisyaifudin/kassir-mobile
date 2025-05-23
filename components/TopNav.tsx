@@ -1,14 +1,18 @@
 import { COLOR } from "@/lib/constants";
-import { ArrowLeft } from "@/lib/icons/ArrowLeft";
-import { Href, Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { Href, useRouter } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export function TopNav({ children, href }: { children: string; href: Href }) {
+	const router = useRouter();
+	const handlePress = () => {
+		router.back();
+	};
 	return (
 		<View style={styles.container}>
-			<Link href={href} replace>
-				<ArrowLeft size={30} />
-			</Link>
+			<Pressable onPress={handlePress}>
+				<ChevronLeft size={30} />
+			</Pressable>
 			<Text style={styles.title}>{children}</Text>
 		</View>
 	);
