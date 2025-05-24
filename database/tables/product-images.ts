@@ -14,6 +14,7 @@ export class ProductImageTable {
 	}): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.withTransactionAsync(async () => {
+				await this.#db.runAsync(`INSERT INTO images VALUES ($uri)`, { $uri: data.uri });
 				await this.#db.runAsync(
 					`INSERT INTO product_images (uri, product_id, width, height, created_at) 
 			     VALUES ($uri, $id, $w, $h, $created)`,
@@ -25,7 +26,6 @@ export class ProductImageTable {
 						$created: data.created,
 					}
 				);
-				await this.#db.runAsync(`INSERT INTO images VALUES ($uri)`, { $uri: data.uri });
 			});
 			return null;
 		} catch (error) {
@@ -33,11 +33,13 @@ export class ProductImageTable {
 			return "Aplikasi bermasalah";
 		}
 	}
-	async delete(uri: number): Promise<"Aplikasi bermasalah" | null> {
+	async delete(uri: string): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.withTransactionAsync(async () => {
-				await this.#db.runAsync("DELETE FROM images WHERE uri = ?", uri);
-				await this.#db.runAsync("DELETE FROM product_images WHERE uri = ?", uri);
+				Promise.all([
+					this.#db.runAsync("DELETE FROM images WHERE uri = ?", uri),
+					this.#db.runAsync("DELETE FROM product_images WHERE uri = ?", uri),
+				]);
 			});
 			return null;
 		} catch (error) {

@@ -58,19 +58,13 @@ export namespace image {
 			return err("Aplikasi bermasalah");
 		}
 	}
-	// export async function getImages(
-	// 	uris: string[]
-	// ): Promise<Result<"Aplikasi bermasalah", string[]>> {
-	// 	const promises = [];
-	// 	for (const uri of uris) {
-	// 		promises.push(FileSystem.getContentUriAsync(uri));
-	// 	}
-	// 	try {
-	// 		const contents = await Promise.all(promises);
-	// 		return ok(contents);
-	// 	} catch (error) {
-	// 		console.error(error);
-	// 		return err("Aplikasi bermasalah");
-	// 	}
-	// }
+	export async function del(uri: string): Promise<"Aplikasi bermasalah" | null> {
+		try {
+			await FileSystem.deleteAsync(uri);
+			return null;
+		} catch (error) {
+			console.error(error);
+			return "Aplikasi bermasalah";
+		}
+	}
 }

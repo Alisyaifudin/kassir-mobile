@@ -21,33 +21,62 @@ import { image } from "@/lib/image";
 import { Plus } from "lucide-react-native";
 import { useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Image, StyleSheet, View } from "react-native";
+import { DeleteImgBtn } from "./delete-btn";
 
 export function ImageDetail({ product }: { product: DB.Product }) {
 	const state = useImages(product.id);
-	return (
-		<Await state={state}>
-			{(images) => (
-				<View className="px-2" style={{ flex: 1 }}>
-					<ImageBtn product={product} />
-					<FlatList
-						data={images}
-						renderItem={({ item }) => (
-							<View style={styles.container}>
-								<Image source={{ uri: item.uri }} style={styles.image} resizeMode="contain" />
-							</View>
-						)}
-						keyExtractor={(item) => item.id.toString()}
-					/>
-				</View>
-			)}
-		</Await>
-	);
+
+	return <Await state={state}>{(images) => <Wrapper images={images} product={product} />}</Await>;
 }
 
 function useImages(id: number) {
 	const db = useDB();
 	const state = useAsync(async () => db.productImage.getByProductId(id), ["fetch-images"]);
 	return state;
+}
+
+function Wrapper({ product, images }: { product: DB.Product; images: DB.ProductImage[] }) {
+	const [selected, setSelected] = useState<null | DB.ProductImage>(
+		images.length === 0 ? null : images[0]
+	);
+	const handleClick = (img: DB.ProductImage) => () => {
+		setSelected(img);
+	};
+	return (
+		<View className="px-2 flex-1, gap-5">
+			<ImageBtn product={product} />
+			<View style={styles.container}>
+				<Show when={selected !== null} fallback={<View style={styles.empty} />}>
+					<DeleteImgBtn img={selected!} />
+					<Image source={{ uri: selected?.uri }} style={styles.image} resizeMode="contain" />
+				</Show>
+			</View>
+			<View style={styles["image-list"]}>
+				<FlatList
+					horizontal
+					data={images}
+					renderItem={({ item }) => (
+						<Button
+							variant={selected?.id === item.id ? "default" : "outline"}
+							size={null}
+							style={[styles["image-container"]]}
+							onPress={handleClick(item)}
+						>
+							<Image
+								source={{ uri: item.uri }}
+								style={{
+									width: "100%",
+									aspectRatio: item.width / item.height,
+								}}
+								resizeMode="contain"
+							/>
+						</Button>
+					)}
+					keyExtractor={(item) => item.id.toString()}
+				/>
+			</View>
+		</View>
+	);
 }
 
 export function ImageBtn({ product }: { product: DB.Product }) {
@@ -175,11 +204,21 @@ const styles = StyleSheet.create({
 		width: "100%",
 		aspectRatio: 1,
 		overflow: "hidden",
+		position: "relative",
+	},
+	"image-container": {
+		width: 100,
+		aspectRatio: 1,
+		overflow: "hidden",
+		padding: 5,
+	},
+	"image-list": {
+		height: 100,
+		overflow: "hidden",
 	},
 	image: {
 		width: "100%",
 		height: "100%",
-		// objectFit: "cover",
 	},
 	empty: {
 		width: "100%",

@@ -20,7 +20,7 @@ import {
 } from "react-hook-form";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
-import { DeleteBtn } from "./delete-btn";
+import { DeleteItemBtn } from "./delete-btn";
 import { ImageDetail } from "./image";
 
 export function Tab({ product }: { product: DB.Product }) {
@@ -135,7 +135,7 @@ export function Form({ product }: { product: DB.Product }) {
 		}
 	};
 	return (
-		<ScrollView contentContainerStyle={styles.container} >
+		<ScrollView contentContainerStyle={styles.container}>
 			<Field
 				label="Nama*"
 				name="name"
@@ -203,7 +203,7 @@ export function Form({ product }: { product: DB.Product }) {
 				)}
 			</Field>
 			<View style={styles["button-container"]}>
-				<DeleteBtn product={product} />
+				<DeleteItemBtn product={product} />
 				<Button onPress={handleSubmit(onSubmit)} style={styles.button}>
 					<Show when={loading}>
 						<ActivityIndicator color="white" />
