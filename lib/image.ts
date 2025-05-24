@@ -3,6 +3,10 @@ import * as ImagePicker from "expo-image-picker";
 import { err, ok, Result } from "./utils";
 
 export namespace image {
+	// export async function deleteAll() {
+	// 	await FileSystem.deleteAsync(`${FileSystem.documentDirectory}product_images/`);
+	// 	return null;
+	// }
 	async function ensureDirExists() {
 		const dir = `${FileSystem.documentDirectory}product_images/`;
 		const dirInfo = await FileSystem.getInfoAsync(dir);
@@ -61,6 +65,19 @@ export namespace image {
 	export async function del(uri: string): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await FileSystem.deleteAsync(uri);
+			return null;
+		} catch (error) {
+			console.error(error);
+			return "Aplikasi bermasalah";
+		}
+	}
+	export async function deleleMany(uris: string[]): Promise<"Aplikasi bermasalah" | null> {
+		const promises = [];
+		for (const uri of uris) {
+			promises.push(FileSystem.deleteAsync(uri));
+		}
+		try {
+			await Promise.all(promises);
 			return null;
 		} catch (error) {
 			console.error(error);

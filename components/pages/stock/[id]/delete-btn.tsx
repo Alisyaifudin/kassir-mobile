@@ -24,9 +24,20 @@ import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
 export function DeleteItemBtn({ product }: { product: DB.Product }) {
 	const db = useDB();
 	const router = useRouter();
-	const { error, loading, setError, action } = useAction("", async () =>
-		db.product.delete(product.id)
-	);
+	const { error, loading, setError, action } = useAction("", async () => {
+		const [errImgs, imgs] = await db.productImage.getByProductId(product.id);
+		if (errImgs) return errImgs;
+		const uris = imgs.map((m) => m.uri);
+		const res = await Promise.all([
+			db.product.delete(product.id),
+			db.productImage.deleteByProductId(product.id, uris),
+			image.deleleMany(uris),
+		]);
+		for (const errMsg of res) {
+			return errMsg;
+		}
+		return null;
+	});
 	const handleSubmit = async () => {
 		const errMsg = await action();
 		setError(errMsg);
@@ -129,7 +140,6 @@ export function DeleteImgBtn({ img }: { img: DB.ProductImage }) {
 		</Dialog>
 	);
 }
-
 const styles = StyleSheet.create({
 	container: {
 		width: "100%",

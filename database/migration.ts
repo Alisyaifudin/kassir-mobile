@@ -12,11 +12,14 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	if (currentDbVersion >= DATABASE_VERSION) {
 		return;
 	}
-	// await db.execAsync(`
-	// 	BEGIN TRANSACTION;
-	// 	DROP TABLE images;
-	// 	DROP TABLE product_images;
-	// 	COMMIT;`);
+
+	// await image.deleteAll();
+	// if (true) {
+	// 	await db.execAsync(`
+	// 	DELETE FROM images;
+	// 	DELETE FROM product_images;
+	// 	`);
+	// }
 
 	if (currentDbVersion === 0) {
 		await db.execAsync(mig00);

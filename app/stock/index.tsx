@@ -3,13 +3,26 @@ import { FAB } from "@/components/Fab";
 import { Item } from "@/components/pages/stock";
 import { TopNav } from "@/components/TopNav";
 import { useProducts } from "@/hooks/useProducts";
+import { emitter } from "@/lib/event-emitter";
 import { Link } from "expo-router";
 import { Plus } from "lucide-react-native";
-import { FlatList, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DetailScreen() {
 	const state = useProducts();
+	const [refreshing, setRefreshing] = useState(false);
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true);
+		emitter.emit("fetch-products");
+	}, []);
+	useEffect(() => {
+		if (!state.loading) {
+			setRefreshing(false);
+		}
+	}, [state]);
 	return (
 		<SafeAreaView style={styles.root}>
 			<TopNav href="/">Stok</TopNav>
@@ -28,6 +41,7 @@ export default function DetailScreen() {
 							contentContainerStyle={{
 								paddingBottom: 100,
 							}}
+							refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 						/>
 					</View>
 				)}
@@ -39,6 +53,12 @@ export default function DetailScreen() {
 const styles = StyleSheet.create({
 	root: {
 		flex: 1,
+	},
+	scrollView: {
+		flex: 1,
+		backgroundColor: "pink",
+		alignItems: "center",
+		justifyContent: "center",
 	},
 	container: {
 		display: "flex",
@@ -54,4 +74,3 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 });
-
