@@ -1,4 +1,6 @@
 export const mig00 = `PRAGMA journal_mode = 'wal';
+BEGIN TRANSACTION;
+
 CREATE TABLE products (
   id INTEGER PRIMARY KEY, 
   name TEXT NOT NULL,
@@ -7,4 +9,7 @@ CREATE TABLE products (
   barcode TEXT,
   capital REAL NOT NULL DEFAULT 0,
   note TEXT NOT NULL DEFAULT ''
-);`
+);
+
+COMMIT;
+`

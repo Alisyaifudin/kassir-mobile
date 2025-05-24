@@ -1,12 +1,12 @@
 import { Await } from "@/components/Await";
-import { Form } from "@/components/pages/stock/edit";
+import { Tab } from "@/components/pages/stock/[id]";
 import { TopNav } from "@/components/TopNav";
 import { useAsync } from "@/hooks/useAsync";
 import { useDB } from "@/hooks/useDB";
 import { numeric } from "@/lib/utils";
 import { Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Page() {
@@ -18,8 +18,13 @@ export default function Page() {
 	const id = parsed.data;
 	return (
 		<SafeAreaView style={styles.root}>
-			<TopNav href="/stock">Edit Barang</TopNav>
-			<Wrapper id={id} />
+			<KeyboardAvoidingView
+				style={styles.root}
+				behavior={Platform.OS === "ios" ? "padding" : "height"} // 'height' or 'padding' works differently on Android/iOS
+			>
+				<TopNav href="/stock">Edit Barang</TopNav>
+				<Wrapper id={id} />
+			</KeyboardAvoidingView>
 		</SafeAreaView>
 	);
 }
@@ -27,11 +32,16 @@ export default function Page() {
 function Wrapper({ id }: { id: number }) {
 	const db = useDB();
 	const state = useAsync(() => db.product.getById(id));
-	return <Await state={state}>{(product) => <Form product={product} />}</Await>;
+	return <Await state={state}>{(product) => <Tab product={product} />}</Await>;
 }
 
 const styles = StyleSheet.create({
 	root: {
 		flex: 1,
+		flexDirection: "column",
+		gap: 5,
+	},
+	inner: {
+		flexGrow: 1,
 	},
 });

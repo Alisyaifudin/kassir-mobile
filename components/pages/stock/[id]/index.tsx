@@ -3,12 +3,14 @@ import { TextError } from "@/components/TextError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
 import { emitter } from "@/lib/event-emitter";
 import { integer, numeric } from "@/lib/utils";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
 	Control,
 	Controller,
@@ -16,9 +18,40 @@ import {
 	SubmitHandler,
 	useForm,
 } from "react-hook-form";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
 import { DeleteBtn } from "./delete-btn";
+import { ImageDetail } from "./image";
+
+export function Tab({ product }: { product: DB.Product }) {
+	const [tab, setTab] = useState<"form" | "image">("form");
+	const changeTab = (v: string) => {
+		const tab = z.enum(["image", "form"]).catch("form").parse(v);
+		setTab(tab);
+	};
+	return (
+		<Tabs
+			value={tab}
+			onValueChange={changeTab}
+			className="w-full max-w-[400px] mx-auto flex-col gap-1.5 flex-1"
+		>
+			<TabsList className="flex-row w-full">
+				<TabsTrigger value="form" className="flex-1 border border-zinc-300">
+					<Text className="font-bold">Detail</Text>
+				</TabsTrigger>
+				<TabsTrigger value="image" className="flex-1 border border-zinc-300">
+					<Text className="font-bold">Gambar</Text>
+				</TabsTrigger>
+			</TabsList>
+			<TabsContent value="form">
+				<Form product={product} />
+			</TabsContent>
+			<TabsContent value="image" style={{ flex: 1 }}>
+				<ImageDetail product={product} />
+			</TabsContent>
+		</Tabs>
+	);
+}
 
 type Inputs = {
 	name: string;
@@ -102,7 +135,7 @@ export function Form({ product }: { product: DB.Product }) {
 		}
 	};
 	return (
-		<View style={styles.container}>
+		<ScrollView contentContainerStyle={styles.container} >
 			<Field
 				label="Nama*"
 				name="name"
@@ -181,7 +214,7 @@ export function Form({ product }: { product: DB.Product }) {
 			<Show when={error !== null && error.global !== ""}>
 				<TextError>{error?.global}</TextError>
 			</Show>
-		</View>
+		</ScrollView>
 	);
 }
 
@@ -223,6 +256,7 @@ const styles = StyleSheet.create({
 		gap: 10,
 		flexDirection: "column",
 		padding: 10,
+		paddingBottom: 60,
 	},
 	field: {
 		display: "flex",

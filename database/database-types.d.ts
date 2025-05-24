@@ -8,4 +8,15 @@ declare namespace DB {
 		capital: number;
 		note: string;
 	}
+	interface Image {
+		uri: string;
+	}
+	interface ProductImage {
+		id: number;
+		uri: string;
+		product_id: number;
+		width: number;
+		height: number;
+		created_at: number;
+	}
 }

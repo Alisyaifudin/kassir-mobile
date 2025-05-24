@@ -61,14 +61,12 @@ export function DeleteBtn({ product }: { product: DB.Product }) {
 							<Text>Batal</Text>
 						</Button>
 					</DialogClose>
-					<DialogClose asChild>
-						<Button variant="destructive" onPress={handleSubmit} className="flex flex-row gap-2">
-							<Show when={loading}>
-								<ActivityIndicator color="white" />
-							</Show>
-							<Text>Hapus</Text>
-						</Button>
-					</DialogClose>
+					<Button variant="destructive" onPress={handleSubmit} className="flex flex-row gap-2">
+						<Show when={loading}>
+							<ActivityIndicator color="white" />
+						</Show>
+						<Text>Hapus</Text>
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

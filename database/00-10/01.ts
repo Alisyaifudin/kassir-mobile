@@ -1,0 +1,18 @@
+export const mig01 = `PRAGMA journal_mode = 'wal';
+BEGIN TRANSACTION;
+
+CREATE TABLE images (
+  uri TEXT PRIMARY KEY
+) STRICT;
+
+CREATE TABLE product_images (
+  id INTEGER PRIMARY KEY,
+  uri TEXT NOT NULL UNIQUE REFERENCES images(uri) ON DELETE CASCADE,
+  product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+) STRICT;
+
+COMMIT;
+`
