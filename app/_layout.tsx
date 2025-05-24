@@ -16,6 +16,9 @@ export default function RootLayout() {
 				>
 					<Stack.Screen name="index" />
 					<Stack.Screen name="stock" />
+					<Stack.Screen name="shop" />
+					<Stack.Screen name="records" />
+					<Stack.Screen name="settings" />
 				</Stack>
 				<PortalHost />
 			</RootProvider>

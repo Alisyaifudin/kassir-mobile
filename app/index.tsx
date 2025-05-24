@@ -11,7 +11,7 @@ export default function HomeScreen() {
 		<SafeAreaView style={styles.root}>
 			<View style={styles.header}>
 				<TextHeader>Kassir</TextHeader>
-				<Link href="/setting" asChild>
+				<Link href="/settings" asChild>
 					<TouchableOpacity style={styles.setting}>
 						<Feather name="settings" size={24} color="black" />
 					</TouchableOpacity>
@@ -20,15 +20,15 @@ export default function HomeScreen() {
 			<View style={styles.container}>
 				<View style={styles.apps}>
 					<View style={styles.grid}>
-						<Button href="/pos">
+						<Button href="/shop">
 							<AntDesign name="printer" size={64} />
-							<Text>POS</Text>
+							<Text>Toko</Text>
 						</Button>
 						<Button href="/stock">
 							<SimpleLineIcons name="handbag" size={64} color="black" />
 							<Text>Stok</Text>
 						</Button>
-						<Button href="/record">
+						<Button href="/records">
 							<FontAwesome5 name="clipboard-list" size={64} color="black" />
 							<Text>Riwayat</Text>
 						</Button>
