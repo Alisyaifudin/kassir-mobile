@@ -98,7 +98,7 @@ export default function Page() {
 	};
 	return (
 		<SafeAreaView style={styles.root}>
-			<TopNav href="/stock">Barang Baru</TopNav>
+			<TopNav>Barang Baru</TopNav>
 			<View style={styles.container}>
 				<Field
 					label="Nama*"

@@ -1,8 +1,5 @@
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Feather from "@expo/vector-icons/Feather";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { Href, Link } from "expo-router";
+import { Box, Hamburger, NotepadText, Settings, Warehouse } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,23 +10,29 @@ export default function HomeScreen() {
 				<TextHeader>Kassir</TextHeader>
 				<Link href="/settings" asChild>
 					<TouchableOpacity style={styles.setting}>
-						<Feather name="settings" size={24} color="black" />
+						<Settings size={24} />
 					</TouchableOpacity>
 				</Link>
 			</View>
 			<View style={styles.container}>
 				<View style={styles.apps}>
 					<View style={styles.grid}>
-						<Button href="/shop">
-							<AntDesign name="printer" size={64} />
-							<Text>Toko</Text>
+						<Button href="/sell">
+							<Hamburger size={64} />
+							<Text>Jual</Text>
 						</Button>
+						<Button href="/buy">
+							<Box size={64} />
+							<Text>Beli</Text>
+						</Button>
+					</View>
+					<View style={styles.grid}>
 						<Button href="/stock">
-							<SimpleLineIcons name="handbag" size={64} color="black" />
+							<Warehouse size={64} />
 							<Text>Stok</Text>
 						</Button>
 						<Button href="/records">
-							<FontAwesome5 name="clipboard-list" size={64} color="black" />
+							<NotepadText size={64} />
 							<Text>Riwayat</Text>
 						</Button>
 					</View>

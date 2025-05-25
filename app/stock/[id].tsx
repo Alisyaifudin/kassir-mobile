@@ -22,7 +22,7 @@ export default function Page() {
 				style={styles.root}
 				behavior={Platform.OS === "ios" ? "padding" : "height"} // 'height' or 'padding' works differently on Android/iOS
 			>
-				<TopNav href="/stock">Edit Barang</TopNav>
+				<TopNav >Edit Barang</TopNav>
 				<Wrapper id={id} />
 			</KeyboardAvoidingView>
 		</SafeAreaView>

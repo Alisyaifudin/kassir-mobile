@@ -25,7 +25,7 @@ export default function DetailScreen() {
 	}, [state]);
 	return (
 		<SafeAreaView style={styles.root}>
-			<TopNav href="/">Stok</TopNav>
+			<TopNav>Stok</TopNav>
 			<Await state={state}>
 				{(products) => (
 					<View style={styles.container}>

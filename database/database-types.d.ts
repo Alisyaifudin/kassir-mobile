@@ -20,3 +20,5 @@ declare namespace DB {
 		created_at: number;
 	}
 }
+
+type Mode = "buy" | "sell";

@@ -32,3 +32,8 @@ export const COLOR = {
 		950: "#09090b",
 	},
 } as const;
+
+export const modeName = {
+	sell: "Jual",
+	buy: "Beli",
+} as const;
