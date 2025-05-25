@@ -1,17 +1,19 @@
 import { Cond } from "@/components/Cond";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { FlatList, View } from "react-native";
+import { FlatList, TouchableOpacity, View } from "react-native";
 // eslint-disable-next-line import/no-named-as-default
 import Decimal from "decimal.js";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react-native";
+import { Plus, X } from "lucide-react-native";
 import { useState } from "react";
 import { Item, useItems } from "./use-item";
 import { useDebounceCallback } from "@react-hook/debounce";
 import { z } from "zod";
 
-export function ItemList({ items }: { items: Item[] }) {
+export function ItemList() {
+	const { items } = useItems();
+	console.log("helloo", items);
 	return (
 		<FlatList
 			data={items}
@@ -26,7 +28,7 @@ export function ItemList({ items }: { items: Item[] }) {
 
 function ItemCell({ item, index }: { item: Item; index: number }) {
 	const total = new Decimal(item.price).times(item.qty);
-	const { set } = useItems();
+	const { set, removeItem } = useItems();
 	const [itemLocal, setItemLocal] = useState({
 		name: item.name,
 		barcode: item.barcode ?? "",
@@ -85,6 +87,9 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 		setItemLocal({ ...itemLocal, qty: v });
 		debounce.qty(v);
 	};
+	const handleRemove = () => {
+		removeItem(index);
+	};
 	return (
 		<View className="flex gap-1 bg-zinc-50 p-0.5 mt-1 shadow-black shadow-md">
 			<View className="flex flex-row gap-1 items-center pl-1">
@@ -99,6 +104,9 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 				>
 					<Input value={itemLocal.name} className="flex-1" />
 				</Cond>
+				<TouchableOpacity onPress={handleRemove} className="bg-red-500 rounded-full">
+					<X color="white" />
+				</TouchableOpacity>
 			</View>
 			<View className="gap-1 flex-row">
 				<View style={{ flex: 3 }}>

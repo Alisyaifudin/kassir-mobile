@@ -30,7 +30,11 @@ export function useItemsLocal(mode: Mode) {
 		});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
+	const removeItem = (index: number) => {
+		const rest = items.filter((_, i) => i !== index);
+		setItems(rest);
+		setItemsLocal(mode, rest);
+	};
 	const addItem = (added: { id: number; price: number; name: string; barcode: string | null }) => {
 		const index = items.findIndex(
 			(i) => i.id === added.id || (i.barcode !== null && i.barcode === added.barcode)
@@ -157,6 +161,7 @@ export function useItemsLocal(mode: Mode) {
 	const val = {
 		items,
 		addItem,
+		removeItem,
 		set: {
 			name: changeName,
 			barcode: changeBarcode,
@@ -171,6 +176,7 @@ export function useItemsLocal(mode: Mode) {
 const ItemContext = createContext<null | {
 	items: Item[];
 	addItem(added: { id: number; price: number; name: string; barcode: string | null }): void;
+	removeItem: (index: number) => void;
 	set: {
 		name(index: number, val: string): void;
 		barcode(index: number, val: string): void;

@@ -8,6 +8,7 @@ import { Menu } from "lucide-react-native";
 import MiniSearch, { MatchInfo } from "minisearch";
 import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
+import { useItems } from "./use-item";
 
 export type ProductResult = Pick<DB.Product, "barcode" | "name" | "price" | "id">;
 
@@ -40,13 +41,8 @@ export function Search({
 	);
 }
 
-export function SearchItems({
-	products,
-	addItem,
-}: {
-	products: DB.Product[];
-	addItem: (item: { id: number; price: number; name: string; barcode: string | null }) => void;
-}) {
+export function SearchItems({ products }: { products: DB.Product[] }) {
+	const { addItem } = useItems();
 	const [value, setValue] = useState("");
 	const [items, setItems] = useState<Result[]>([]);
 	const miniSearch = useMemo(() => {
@@ -86,7 +82,12 @@ export function SearchItems({
 		debounce(v);
 	};
 	const handlePress = (item: Result) => {
-		addItem(item);
+		addItem({
+			barcode: item.barcode,
+			id: item.id,
+			name: item.name,
+			price: item.price,
+		});
 		setItems([]);
 		setValue("");
 	};
