@@ -6,27 +6,14 @@ import { FlatList, TouchableOpacity, View } from "react-native";
 import Decimal from "decimal.js";
 import { X } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Disc, type Item, useItems } from "./use-item";
+import { calcSubTotal, Disc, type Item, useItems } from "./use-item";
 import { useDebounceCallback } from "@react-hook/debounce";
 import { z } from "zod";
 import { DiscountBtn } from "./discount";
 import { Show } from "@/components/Show";
 
-export function ItemList() {
-	const { items } = useItems();
-	return (
-		<FlatList
-			data={items}
-			renderItem={({ item, index }) => <ItemCell item={item} index={index} />}
-			contentContainerStyle={{
-				paddingBottom: 100,
-			}}
-		/>
-	);
-}
-
-function ItemCell({ item, index }: { item: Item; index: number }) {
-	const { set, removeItem, fix } = useItems();
+export function ItemCard({ item, index }: { item: Item; index: number }) {
+	const { set, fix } = useItems();
 	const [itemLocal, setItemLocal] = useState({
 		name: item.name,
 		barcode: item.barcode ?? "",
@@ -37,33 +24,33 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 		if (item.qty !== Number(itemLocal.qty)) {
 			setItemLocal({ ...itemLocal, qty: item.qty.toString() });
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [item.qty]);
 	const debounce = {
 		name: useDebounceCallback((val: string) => {
-			set.name(index, val);
+			set.items.name(index, val);
 		}, 300),
 		barcode: useDebounceCallback((val: string) => {
-			set.barcode(index, val);
+			set.items.barcode(index, val);
 		}, 300),
 		price: useDebounceCallback((val: string) => {
-			set.price(index, val);
+			set.items.price(index, val);
 		}, 300),
 		qty: useDebounceCallback((val: string) => {
-			set.qty(index, val);
+			set.items.qty(index, val);
 		}, 300),
 		disc: {
 			add: useDebounceCallback(() => {
-				set.disc.add(index);
+				set.items.disc.add(index);
 			}, 300),
 			remove: useDebounceCallback((discIndex: number) => {
-				set.disc.remove(index, discIndex);
+				set.items.disc.remove(index, discIndex);
 			}, 300),
 			kind: useDebounceCallback((discIndex: number, val: string) => {
-				set.disc.kind(index, discIndex, val);
+				set.items.disc.kind(index, discIndex, val);
 			}, 300),
 			value: useDebounceCallback((discIndex: number, val: string) => {
-				set.disc.value(index, discIndex, val);
+				set.items.disc.value(index, discIndex, val);
 			}, 300),
 		},
 	};
@@ -91,10 +78,18 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 		setItemLocal({ ...itemLocal, qty: v });
 		debounce.qty(v);
 	};
-	const handleRemove = () => {
-		removeItem(index);
+	const changeBarcode = (v: string) => {
+		setItemLocal({ ...itemLocal, barcode: v.trim() });
+		debounce.barcode(v);
 	};
-	const { discVals, subtotal } = calcTotal(item, fix);
+	const changeName = (v: string) => {
+		setItemLocal({ ...itemLocal, name: v.trimStart() });
+		debounce.name(v);
+	};
+	const handleRemove = () => {
+		set.items.remove(index);
+	};
+	const { discVals, subtotal } = calcSubTotal(item, fix);
 	return (
 		<View className="flex gap-1 bg-zinc-50 p-0.5 mt-1 shadow-black shadow-md">
 			<View className="flex flex-row gap-1 items-center pl-1">
@@ -107,7 +102,7 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 						</View>
 					}
 				>
-					<Input value={itemLocal.name} className="flex-1" />
+					<Input value={itemLocal.name} className="flex-1" onChangeText={changeName} />
 				</Cond>
 				<TouchableOpacity onPress={handleRemove} className="bg-red-500 rounded-full">
 					<X color="white" />
@@ -124,7 +119,7 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 							</View>
 						}
 					>
-						<Input value={item.barcode ?? ""} />
+						<Input value={itemLocal.barcode} onChangeText={changeBarcode} />
 					</Cond>
 				</View>
 				<View style={{ flex: 2 }}>
@@ -149,25 +144,6 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 			</View>
 		</View>
 	);
-}
-
-function calcTotal(item: Item, fix: number) {
-	const discVals: number[] = [];
-	let subtotal = new Decimal(item.price).times(item.qty);
-	for (const disc of item.discs) {
-		switch (disc.kind) {
-			case "number":
-				subtotal = subtotal.minus(disc.value);
-				discVals.push(disc.value);
-				break;
-			case "percent":
-				const val = subtotal.times(disc.value).div(100).toFixed(fix);
-				subtotal = subtotal.minus(val);
-				discVals.push(Number(val));
-				break;
-		}
-	}
-	return { subtotal, discVals };
 }
 
 function Discount({ discVals, discs }: { discVals: number[]; discs: Disc[] }) {

@@ -10,30 +10,21 @@ import {
 import { Text } from "@/components/ui/text";
 import { Plus, X } from "lucide-react-native";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Item, useItems } from "./use-item";
 import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { useState } from "react";
 import { useDebounceCallback } from "@react-hook/debounce";
 import { produce } from "immer";
+import { SelectKind } from "./select-kind";
 
 export function DiscountBtn({ index, item }: { index: number; item: Item }) {
 	const { set } = useItems();
 	const [discVals, setDiscVals] = useState(item.discs.map((d) => d.value.toString()));
-	console.log({discVals})
 	const debounce = useDebounceCallback((i: number, value: string) => {
-		set.disc.value(index, i, value);
+		set.items.disc.value(index, i, value);
 	}, 300);
 	const handleAdd = () => {
-		set.disc.add(index);
+		set.items.disc.add(index);
 	};
 	const handleChange = (i: number, s: string) => {
 		setDiscVals((prev) =>
@@ -64,7 +55,7 @@ export function DiscountBtn({ index, item }: { index: number; item: Item }) {
 	};
 	const handleDel = (i: number) => () => {
 		setDiscVals((prev) => prev.filter((_, j) => j !== i));
-		set.disc.remove(index, i);
+		set.items.disc.remove(index, i);
 	};
 	return (
 		<Dialog>
@@ -85,7 +76,7 @@ export function DiscountBtn({ index, item }: { index: number; item: Item }) {
 								value={discVals[i]}
 								onChangeText={(s) => handleChange(i, s)}
 							/>
-							<SelectKind kind={disc.kind} change={(kind) => set.disc.kind(index, i, kind)} />
+							<SelectKind kind={disc.kind} change={(kind) => set.items.disc.kind(index, i, kind)} />
 							<Button variant="destructive" size="icon" onPress={handleDel(i)}>
 								<X color="white" />
 							</Button>
@@ -102,47 +93,3 @@ export function DiscountBtn({ index, item }: { index: number; item: Item }) {
 	);
 }
 
-const kindLabel = {
-	percent: "Persen",
-	number: "Angka",
-} as const;
-
-function SelectKind({
-	kind,
-	change,
-}: {
-	kind: "percent" | "number";
-	change: (kind: string) => void;
-}) {
-	const insets = useSafeAreaInsets();
-	const contentInsets = {
-		top: insets.top,
-		bottom: insets.bottom,
-		left: 12,
-		right: 12,
-	};
-	const changeKind = (option?: { label: string; value: string }) => {
-		if (!option) return;
-		change(option.value);
-	};
-	return (
-		<Select value={{ value: kind, label: kindLabel[kind] }} onValueChange={changeKind}>
-			<SelectTrigger>
-				<SelectValue
-					className="text-foreground text-sm native:text-lg"
-					placeholder="Select a fruit"
-				/>
-			</SelectTrigger>
-			<SelectContent className="z-20 bg-white" insets={contentInsets}>
-				<SelectGroup>
-					<SelectItem label="Persen" value="percent">
-						Persen
-					</SelectItem>
-					<SelectItem label="Angka" value="number">
-						Angka
-					</SelectItem>
-				</SelectGroup>
-			</SelectContent>
-		</Select>
-	);
-}

@@ -62,16 +62,18 @@ function DialogContent({
 	className,
 	children,
 	portalHost,
+	overlayClass,
 	...props
 }: DialogPrimitive.ContentProps & {
 	ref?: React.RefObject<DialogPrimitive.ContentRef>;
 	className?: string;
 	portalHost?: string;
+	overlayClass?: string;
 }) {
 	const { open } = DialogPrimitive.useRootContext();
 	return (
 		<DialogPortal hostName={portalHost}>
-			<DialogOverlay>
+			<DialogOverlay className={overlayClass}>
 				<DialogPrimitive.Content
 					className={cn(
 						"max-w-lg gap-4 border border-border web:cursor-default bg-background p-6 shadow-lg web:duration-200 rounded-lg",

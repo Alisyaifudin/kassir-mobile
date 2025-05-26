@@ -1,8 +1,8 @@
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export const version = "2.12.5";
 
@@ -18,17 +18,21 @@ export const METHOD_NAMES = {
 
 // export const log = logTauri;
 
-export const numerish = z.string().refine((val) => val !== "" && !isNaN(Number(val)), {
-	message: "Harus angka",
-});
+export const numerish = z
+	.string()
+	.refine((val) => val !== "", {
+		message: "Harus ada",
+	})
+	.refine((val) => !isNaN(Number(val)), { message: "Harus angka" });
 
 export const numeric = numerish.transform((val) => Number(val));
 
 export const integer = z
 	.string()
-	.refine((val) => val !== "" && !isNaN(Number(val)), {
-		message: "Harus angka",
+	.refine((val) => val !== "", {
+		message: "Harus ada",
 	})
+	.refine((val) => !isNaN(Number(val)), { message: "Harus angka" })
 	.transform((val) => Number(val))
 	.refine((v) => Number.isInteger(v), { message: "Harus bulat" });
 
@@ -167,7 +171,6 @@ export function getBackURL(defaultURL: string, search: URLSearchParams) {
 	return urlBack;
 }
 
-
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+	return twMerge(clsx(inputs));
 }

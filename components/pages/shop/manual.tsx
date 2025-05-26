@@ -1,153 +1,206 @@
-import { Show } from "@/components/Show";
-import { TextError } from "@/components/TextError";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
-	DialogDescription,
-	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
-import { useAction } from "@/hooks/useAction";
-import { useDB } from "@/hooks/useDB";
-import { emitter } from "@/lib/event-emitter";
-import { image } from "@/lib/image";
-import { useRouter } from "expo-router";
-import { X } from "lucide-react-native";
+import { integer, numeric } from "@/lib/utils";
+import { Menu } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
+import { View } from "react-native";
+import { z } from "zod";
+import { AdditionalForm, Field } from "./additional";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { useItems } from "./use-item";
 
-export function DeleteItemBtn({ product }: { product: DB.Product }) {
-	const db = useDB();
-	const router = useRouter();
-	const { error, loading, setError, action } = useAction("", async () => {
-		const [errImgs, imgs] = await db.productImage.getByProductId(product.id);
-		if (errImgs) return errImgs;
-		const uris = imgs.map((m) => m.uri);
-		const res = await Promise.all([
-			db.product.delete(product.id),
-			db.productImage.deleteByProductId(product.id, uris),
-			image.deleleMany(uris),
-		]);
-		for (const errMsg of res) {
-			return errMsg;
-		}
-		return null;
-	});
-	const handleSubmit = async () => {
-		const errMsg = await action();
-		setError(errMsg);
-		if (errMsg === null) {
-			setError(null);
-			db.product.revalidate("all");
-			emitter.emit("fetch-products");
-			router.back();
-		}
-	};
-	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="destructive">
-					<Text>Hapus</Text>
-				</Button>
-			</DialogTrigger>
-			<DialogContent className="max-w-full w-full min-w-full">
-				<DialogHeader>
-					<DialogTitle>Hapus Barang</DialogTitle>
-					<DialogDescription>Kamu akan menghapus:</DialogDescription>
-					<DialogDescription>
-						{">"} Nama: {product.name}
-					</DialogDescription>
-					<DialogDescription>
-						{">"} Harga: Rp{product.price.toLocaleString("id-ID")}
-					</DialogDescription>
-					<Show when={error !== null}>
-						<TextError>{error}</TextError>
-					</Show>
-				</DialogHeader>
-				<DialogFooter className="flex flex-row justify-between">
-					<DialogClose asChild>
-						<Button>
-							<Text>Batal</Text>
-						</Button>
-					</DialogClose>
-					<Button variant="destructive" onPress={handleSubmit} className="flex flex-row gap-2">
-						<Show when={loading}>
-							<ActivityIndicator color="white" />
-						</Show>
-						<Text>Hapus</Text>
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
-	);
-}
+const tabSchema = z.enum(["manual", "additional"]);
 
-export function DeleteImgBtn({ img }: { img: DB.ProductImage }) {
-	const db = useDB();
+type TabOption = z.infer<typeof tabSchema>;
+
+export function ManualBtn() {
+	const [tab, setTab] = useState<TabOption>("manual");
+	const { set } = useItems();
 	const [open, setOpen] = useState(false);
-	const { error, loading, setError, action } = useAction("", async () => {
-		const errDel = await image.del(img.uri);
-		if (errDel) {
-			return errDel;
-		}
-		const errMsg = await db.productImage.delete(img.uri);
-		return errMsg;
-	});
-	const handleSubmit = async () => {
-		const errMsg = await action();
-		setError(errMsg);
-		if (errMsg === null) {
-			emitter.emit("fetch-images");
-			setOpen(false);
-		}
+	const handleChangeTab = (v: string) => {
+		const tab = tabSchema.catch("manual").parse(v);
+		setTab(tab);
 	};
 	return (
 		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
 			<DialogTrigger asChild>
-				<Button variant="destructive" size="icon" className="absolute top-0 right-0 z-10">
-					<X color="white" />
+				<Button size="icon" variant="outline">
+					<Menu />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-full w-full min-w-full">
+			<DialogContent
+				overlayClass="justify-start"
+				className="max-w-full w-full min-w-full h-full max-h-[520] mt-7"
+			>
 				<DialogHeader>
-					<DialogTitle>Hapus Gambar</DialogTitle>
-					<View style={styles.container}>
-						<Image source={{ uri: img.uri }} style={styles.image} resizeMode="contain" />
-					</View>
-					<Show when={error !== null}>
-						<TextError>{error}</TextError>
-					</Show>
+					<DialogTitle>Tambahkan</DialogTitle>
 				</DialogHeader>
-				<DialogFooter className="flex flex-row justify-between">
-					<DialogClose asChild>
-						<Button variant="secondary">
-							<Text>Batal</Text>
-						</Button>
-					</DialogClose>
-					<Button variant="destructive" className="flex flex-row gap-2" onPress={handleSubmit}>
-						<Show when={loading}>
-							<ActivityIndicator color="white" />
-						</Show>
-						<Text>Hapus</Text>
-					</Button>
-				</DialogFooter>
+				<Tabs
+					value={tab}
+					onValueChange={handleChangeTab}
+					className="w-full mx-auto flex-col gap-1.5 flex-1"
+				>
+					<TabsList className="flex-row w-full">
+						<TabsTrigger value="manual" className="flex-1">
+							<Text>Manual</Text>
+						</TabsTrigger>
+						<TabsTrigger value="additional" className="flex-1">
+							<Text>Biaya Lainnya</Text>
+						</TabsTrigger>
+					</TabsList>
+					<TabsContent value="manual" className="flex-1">
+						<ManualForm close={() => setOpen(false)} addManual={set.items.addManual} />
+					</TabsContent>
+					<TabsContent value="additional" className="flex-1">
+						<AdditionalForm close={() => setOpen(false)} addAdditional={set.additionals.add} />
+					</TabsContent>
+				</Tabs>
 			</DialogContent>
 		</Dialog>
 	);
 }
-const styles = StyleSheet.create({
-	container: {
-		width: "100%",
-		aspectRatio: 1,
-		overflow: "hidden",
-	},
-	image: {
-		width: "100%",
-		height: "100%",
-	},
+
+const manualSchema = z.object({
+	name: z.string().min(1, "Harus ada").trim(),
+	price: numeric,
+	qty: integer,
+	stock: integer,
+	barcode: z
+		.string()
+		.trim()
+		.transform((v) => (v === "" ? null : v)),
 });
+
+type Inputs = {
+	name: string;
+	price: string;
+	stock: string;
+	qty: string;
+	barcode: string;
+};
+
+const emptyFields = {
+	name: "",
+	price: "",
+	qty: "",
+	stock: "",
+	barcode: "",
+};
+
+function ManualForm({
+	close,
+	addManual,
+}: {
+	close: () => void;
+	addManual: (added: {
+		qty: number;
+		stock: number;
+		price: number;
+		name: string;
+		barcode: string | null;
+	}) => "Barang dengan barcode tersebut sudah ada" | null;
+}) {
+	const { control, handleSubmit } = useForm<Inputs>({
+		defaultValues: emptyFields,
+	});
+	const [error, setError] = useState(emptyFields);
+	const onSubmit: SubmitHandler<Inputs> = async (raw) => {
+		const parsed = manualSchema.safeParse(raw);
+		if (!parsed.success) {
+			const errs = parsed.error.flatten().fieldErrors;
+			setError({
+				name: errs.name?.join("; ") ?? "",
+				price: errs.price?.join("; ") ?? "",
+				qty: errs.qty !== undefined && errs.qty.length > 0 ? errs.qty[0] : "",
+				stock: errs.stock !== undefined && errs.stock.length > 0 ? errs.stock[0] : "",
+				barcode: errs.barcode?.join("; ") ?? "",
+			});
+			return;
+		}
+		const data = parsed.data;
+		if (data.qty > data.stock) {
+			setError({ ...emptyFields, qty: "Melebihi stok!" });
+			return;
+		}
+		const errMsg = addManual(parsed.data);
+		if (errMsg === null) {
+			close();
+		} else {
+			setError({ ...emptyFields, barcode: errMsg });
+		}
+	};
+	return (
+		<View className="flex-col flex flex-1 gap-2">
+			<View className="flex flex-col gap-2 flex-1">
+				<Field
+					label="Barcode"
+					name="barcode"
+					control={control}
+					error={{ show: error.barcode !== "", msg: error.barcode }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					)}
+				</Field>
+				<Field
+					label="Nama*"
+					name="name"
+					control={control}
+					error={{ show: error.name !== "", msg: error.name }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					)}
+				</Field>
+				<Field
+					label="Harga*"
+					name="price"
+					control={control}
+					error={{ show: error.price !== "", msg: error.price }}
+				>
+					{({ onBlur, onChange, value }) => (
+						<Input keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+					)}
+				</Field>
+				<View className="flex-row gap-1 w-full ">
+					<Field
+						label="Kuantitas*"
+						name="qty"
+						control={control}
+						className="flex-1"
+						error={{ show: error.qty !== "", msg: error.qty }}
+					>
+						{({ onBlur, onChange, value }) => (
+							<Input keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+						)}
+					</Field>
+					<Field
+						label="Stok*"
+						name="stock"
+						className="flex-1"
+						control={control}
+						error={{ show: error.stock !== "", msg: error.stock }}
+					>
+						{({ onBlur, onChange, value }) => (
+							<Input keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+						)}
+					</Field>
+				</View>
+			</View>
+			<View className="flex flex-row justify-end">
+				<Button className="flex flex-row gap-2" onPress={handleSubmit(onSubmit)}>
+					<Text>Tambahkan</Text>
+				</Button>
+			</View>
+		</View>
+	);
+}

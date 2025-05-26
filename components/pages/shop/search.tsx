@@ -4,11 +4,11 @@ import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { useDebounceCallback } from "@react-hook/debounce";
-import { Menu } from "lucide-react-native";
 import MiniSearch, { MatchInfo } from "minisearch";
 import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useItems } from "./use-item";
+import { ManualBtn } from "./manual";
 
 export type ProductResult = Pick<DB.Product, "barcode" | "name" | "price" | "id">;
 
@@ -42,7 +42,7 @@ export function Search({
 }
 
 export function SearchItems({ products }: { products: DB.Product[] }) {
-	const { addItem } = useItems();
+	const { set } = useItems();
 	const [value, setValue] = useState("");
 	const [items, setItems] = useState<Result[]>([]);
 	const miniSearch = useMemo(() => {
@@ -82,7 +82,7 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 		debounce(v);
 	};
 	const handlePress = (item: Result) => {
-		addItem({
+		set.items.add({
 			barcode: item.barcode,
 			id: item.id,
 			name: item.name,
@@ -99,9 +99,7 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 		<View className="flex flex-col relative">
 			<View className="flex-row justify-between items-center gap-2">
 				<Search value={value} onChange={handleChange} onEnter={handleEnter} />
-				<Button size="icon" variant="outline">
-					<Menu />
-				</Button>
+				<ManualBtn />
 			</View>
 			<View
 				className={cn(
