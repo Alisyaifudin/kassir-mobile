@@ -4,21 +4,20 @@ import { Text } from "@/components/ui/text";
 import { FlatList, TouchableOpacity, View } from "react-native";
 // eslint-disable-next-line import/no-named-as-default
 import Decimal from "decimal.js";
-import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react-native";
-import { useState } from "react";
-import { Item, useItems } from "./use-item";
+import { X } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Disc, type Item, useItems } from "./use-item";
 import { useDebounceCallback } from "@react-hook/debounce";
 import { z } from "zod";
+import { DiscountBtn } from "./discount";
+import { Show } from "@/components/Show";
 
 export function ItemList() {
 	const { items } = useItems();
-	console.log("helloo", items);
 	return (
 		<FlatList
 			data={items}
 			renderItem={({ item, index }) => <ItemCell item={item} index={index} />}
-			// keyExtractor={(item) => item.id.toString()}
 			contentContainerStyle={{
 				paddingBottom: 100,
 			}}
@@ -27,14 +26,19 @@ export function ItemList() {
 }
 
 function ItemCell({ item, index }: { item: Item; index: number }) {
-	const total = new Decimal(item.price).times(item.qty);
-	const { set, removeItem } = useItems();
+	const { set, removeItem, fix } = useItems();
 	const [itemLocal, setItemLocal] = useState({
 		name: item.name,
 		barcode: item.barcode ?? "",
 		qty: item.qty === 0 ? "" : item.qty.toString(),
 		price: item.price === 0 ? "" : item.price.toString(),
 	});
+	useEffect(() => {
+		if (item.qty !== Number(itemLocal.qty)) {
+			setItemLocal({ ...itemLocal, qty: item.qty.toString() });
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [item.qty]);
 	const debounce = {
 		name: useDebounceCallback((val: string) => {
 			set.name(index, val);
@@ -90,6 +94,7 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 	const handleRemove = () => {
 		removeItem(index);
 	};
+	const { discVals, subtotal } = calcTotal(item, fix);
 	return (
 		<View className="flex gap-1 bg-zinc-50 p-0.5 mt-1 shadow-black shadow-md">
 			<View className="flex flex-row gap-1 items-center pl-1">
@@ -115,7 +120,7 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 						when={item.id === null}
 						fallback={
 							<View className="h-11 justify-center px-3">
-								<Text className="native:text-lg">{item.barcode}</Text>
+								<Text className="native:text-lg">{item.barcode ?? "--------"}</Text>
 							</View>
 						}
 					>
@@ -135,13 +140,47 @@ function ItemCell({ item, index }: { item: Item; index: number }) {
 					<Input keyboardType="numeric" value={itemLocal.qty.toString()} onChangeText={changeQty} />
 				</View>
 			</View>
+			<Show when={item.discs.length > 0}>
+				<Discount discVals={discVals} discs={item.discs} />
+			</Show>
 			<View className="flex flex-row justify-between items-center">
-				<Button variant="secondary" className="flex-row">
-					<Text>Diskon</Text>
-					<Plus />
-				</Button>
-				<Text className="text-xl">Subtotal: {total.toNumber().toLocaleString("id-ID")}</Text>
+				<DiscountBtn index={index} item={item} />
+				<Text className="text-xl">Subtotal: {subtotal.toNumber().toLocaleString("id-ID")}</Text>
 			</View>
+		</View>
+	);
+}
+
+function calcTotal(item: Item, fix: number) {
+	const discVals: number[] = [];
+	let subtotal = new Decimal(item.price).times(item.qty);
+	for (const disc of item.discs) {
+		switch (disc.kind) {
+			case "number":
+				subtotal = subtotal.minus(disc.value);
+				discVals.push(disc.value);
+				break;
+			case "percent":
+				const val = subtotal.times(disc.value).div(100).toFixed(fix);
+				subtotal = subtotal.minus(val);
+				discVals.push(Number(val));
+				break;
+		}
+	}
+	return { subtotal, discVals };
+}
+
+function Discount({ discVals, discs }: { discVals: number[]; discs: Disc[] }) {
+	return (
+		<View>
+			{discs.map((disc, i) => (
+				<View key={i} className="flex flex-row justify-end itmes-center">
+					<Text>Diskon{disc.kind === "percent" ? ` ${disc.value}%` : ""}:</Text>
+					<View className="items-end w-20">
+						<Text>{discVals[i].toLocaleString("id-ID")}</Text>
+					</View>
+				</View>
+			))}
 		</View>
 	);
 }

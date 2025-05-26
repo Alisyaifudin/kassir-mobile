@@ -23,11 +23,11 @@ export type Disc = z.infer<typeof discSchema>;
 
 export function useItemsLocal(mode: Mode) {
 	const [items, setItems] = useState<Item[]>([]);
+	const [fix, setFix] = useState(0);
 
 	useEffect(() => {
-		getItemsLocal(mode).then((items) => {
-			setItems(items);
-		});
+		getItemsLocal(mode).then((items) => setItems(items));
+		getFixLocal(mode).then((fix) => setFix(fix));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	const removeItem = (index: number) => {
@@ -157,8 +157,11 @@ export function useItemsLocal(mode: Mode) {
 			);
 		},
 	};
-
+	const changeFix = (fix: number) => {
+		setFix(fix);
+	}
 	const val = {
+		fix,
 		items,
 		addItem,
 		removeItem,
@@ -168,6 +171,7 @@ export function useItemsLocal(mode: Mode) {
 			price: changePrice,
 			qty: changeQty,
 			disc: changeDisc,
+			fix: changeFix
 		},
 	};
 	return val;
@@ -177,6 +181,7 @@ const ItemContext = createContext<null | {
 	items: Item[];
 	addItem(added: { id: number; price: number; name: string; barcode: string | null }): void;
 	removeItem: (index: number) => void;
+	fix: number;
 	set: {
 		name(index: number, val: string): void;
 		barcode(index: number, val: string): void;
@@ -188,6 +193,7 @@ const ItemContext = createContext<null | {
 			kind(itemIndex: number, discIndex: number, val: string): void;
 			value(itemIndex: number, discIndex: number, val: string): void;
 		};
+		fix: (fix: number) => void
 	};
 }>(null);
 
@@ -211,6 +217,18 @@ async function getItemsLocal(mode: Mode): Promise<Item[]> {
 	} catch (error) {
 		console.error(error);
 		return [];
+	}
+}
+
+async function getFixLocal(mode: Mode): Promise<number> {
+	try {
+		const raw = await AsyncStorage.getItem(`${mode}-fix`);
+		const num = Number(raw);
+		if (raw === null || isNaN(num) || !Number.isInteger(num)) return 0;
+		return num;
+	} catch (error) {
+		console.error(error);
+		return 0;
 	}
 }
 
