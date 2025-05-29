@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TopNav } from "@/components/TopNav";
@@ -6,21 +6,21 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useDB } from "@/hooks/useDB";
 import { useAction } from "@/hooks/useAction";
 import { useSession } from "@/components/Auth";
-import { emitter } from "@/lib/event-emitter";
 import { ActivityIndicator, View } from "react-native";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TextError } from "@/components/TextError";
 import { Button } from "@/components/ui/button";
 import { Show } from "@/components/Show";
+import { PasswordForm } from "@/components/pages/settings/profile/password";
 
 type Inputs = {
 	name: string;
 };
 
 export default function Page() {
-	const session = useSession();
-	const { control, handleSubmit } = useForm<Inputs>({
+	const { session, set } = useSession();
+	const { control, handleSubmit, watch } = useForm<Inputs>({
 		defaultValues: { name: session.name },
 	});
 	const db = useDB();
@@ -35,34 +35,43 @@ export default function Page() {
 		}
 		const errMsg = await action(name.trim());
 		setError(errMsg);
-		if (errMsg === null) {
-			emitter.emit("fetch-session");
-		}
+		const errSession = await set.name(name);
+		setError(errSession);
 	};
 	return (
 		<SafeAreaView className="flex-1 justify-between">
 			<View>
 				<TopNav>Profil</TopNav>
-				<View className="flex-row gap-2 items-center">
+				<View className="flex-row gap-2 items-center p-2">
 					<Label>Nama</Label>
 					<Controller
 						control={control}
 						render={({ field }) => (
-							<Input value={field.value} onChangeText={field.onChange} onBlur={field.onBlur} />
+							<Input
+								className="flex-1"
+								value={field.value}
+								onChangeText={field.onChange}
+								onBlur={field.onBlur}
+							/>
 						)}
 						name="name"
 					/>
 				</View>
-				<TextError when={error !== null}>{error}</TextError>
+				<TextError when={error !== null && error !== ""}>{error}</TextError>
+				<View className="items-end p-2">
+					<Button
+						onPress={handleSubmit(onSubmit)}
+						disabled={watch("name").trim() === ""}
+						className="flex-row gap-2 items-center"
+					>
+						<Show when={loading}>
+							<ActivityIndicator color="white" />
+						</Show>
+						<Text>Simpan</Text>
+					</Button>
+				</View>
 			</View>
-			<View className="items-end">
-				<Button className="flex-row gap-2 items-center">
-					<Show when={loading}>
-						<ActivityIndicator color="white" />
-					</Show>
-					<Text>Simpan</Text>
-				</Button>
-			</View>
+			<PasswordForm />
 		</SafeAreaView>
 	);
 }

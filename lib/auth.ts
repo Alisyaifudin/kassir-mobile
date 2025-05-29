@@ -9,13 +9,14 @@ export namespace Session {
 	export async function logout() {
 		await SecureStore.deleteItemAsync("session");
 	}
-	export async function updateRole(role: Role): Promise<"Success" | "Fail"> {
+	export async function updateName(name: string): Promise<"Success" | "Fail"> {
 		const session = await get();
 		if (session === null) return "Fail";
-		if (role === "admin") return "Fail";
-		session.role = role;
+		session.name = name;
+		await store(session);
 		return "Success";
 	}
+	
 	async function store(session: Session): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			const str = JSON.stringify(session);

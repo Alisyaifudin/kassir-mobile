@@ -52,6 +52,19 @@ export class CashierTable {
 			return "Aplikasi bermasalah";
 		}
 	}
+	async updatePassword(id: number, password: string): Promise<"Aplikasi bermasalah" | null> {
+		try {
+			const hash = await crypt.hash(password);
+			await this.#db.runAsync("UPDATE cashiers SET password = $hash WHERE id = $id", {
+				$id: id,
+				$hash: hash,
+			});
+			return null;
+		} catch (error) {
+			console.error(error);
+			return "Aplikasi bermasalah";
+		}
+	}
 	async del(id: number): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.runAsync("DELETE FROM cashiers WHERE id = ? AND role != 'admin'", id);

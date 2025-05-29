@@ -1,7 +1,7 @@
 {
   "name": "kassir-mobile",
   "main": "expo-router/entry",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -17,6 +17,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@rn-primitives/accordion": "^1.2.0",
     "@rn-primitives/dialog": "^1.2.0",
     "@rn-primitives/label": "^1.2.0",
     "@rn-primitives/select": "^1.2.0",

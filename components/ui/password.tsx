@@ -8,7 +8,7 @@ const Password = React.forwardRef<React.ComponentRef<typeof TextInput>, TextInpu
 	({ className, placeholderClassName, ...props }, ref) => {
 		const [show, setShow] = React.useState(false);
 		return (
-			<View className="relative">
+			<View className="relative w-full native:h-12 h-10">
 				<TextInput
 					autoComplete="password-new"
 					secureTextEntry={!show}
