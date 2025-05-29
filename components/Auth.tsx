@@ -45,7 +45,7 @@ function Wrapper({ session: s, children }: { children: React.ReactNode; session:
 }
 
 export function useAuth() {
-	const state = useAsync(() => Session.get());
+	const state = useAsync(() => Session.get(), ["fetch-session"]);
 	return state;
 }
 
