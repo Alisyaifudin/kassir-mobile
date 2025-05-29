@@ -3,6 +3,7 @@ import { migrateDbIfNeeded } from "@/database/migration";
 import "@/global.css";
 import { PortalHost } from "@rn-primitives/portal";
 import { Stack } from "expo-router";
+import Toast from 'react-native-toast-message';
 import { SQLiteProvider } from "expo-sqlite";
 
 export default function RootLayout() {
@@ -22,6 +23,7 @@ export default function RootLayout() {
 					<Stack.Screen name="settings" />
 				</Stack>
 				<PortalHost />
+				<Toast />
 			</RootProvider>
 		</SQLiteProvider>
 	);

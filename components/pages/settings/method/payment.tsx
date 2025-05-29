@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useAsync } from "@/hooks/useAsync";
 import { Await } from "@/components/Await";
 import { emitter } from "@/lib/event-emitter";
+import { Card } from "./card";
 export function PaymentMethod({ method }: { method: DB.Method }) {
 	const state = useMethods();
 	return (
@@ -32,7 +33,7 @@ export function PaymentMethod({ method }: { method: DB.Method }) {
 						{methods
 							.filter((m) => m.method === method)
 							.map((method) => (
-								<Text key={method.id}>{method.name}</Text>
+								<Card key={method.id} method={method} />
 							))}
 					</View>
 				)}

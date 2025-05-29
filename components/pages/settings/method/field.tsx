@@ -9,6 +9,8 @@ export function Field<const Inputs extends Record<string, string>>({
 	name,
 	children,
 	className,
+	classInput,
+	classLabel,
 	desc,
 	error,
 }: {
@@ -16,16 +18,18 @@ export function Field<const Inputs extends Record<string, string>>({
 	name: Path<Inputs>;
 	control: Control<Inputs, any, Inputs>;
 	className?: string;
+	classInput?: string;
+	classLabel?: string;
 	children: (field: ControllerRenderProps<Inputs, Path<Inputs>>) => React.ReactElement;
 	desc?: React.ReactNode;
 	error?: { show: boolean; msg: string };
 }) {
 	return (
 		<View className={className}>
-			<View className="w-full">
+			<View className={classLabel}>
 				<Label>{label}</Label>
 			</View>
-			<View className="w-full">
+			<View className={classInput}>
 				<Controller control={control} render={({ field }) => children(field)} name={name} />
 			</View>
 			<TextError when={error !== undefined && error.show}>{error?.msg}</TextError>
