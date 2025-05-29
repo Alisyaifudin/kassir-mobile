@@ -1,6 +1,6 @@
 import { TopNav } from "@/components/TopNav";
 import { Button } from "@/components/ui/button";
-import { Link } from "expo-router";
+import { Href, Link } from "expo-router";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,11 +21,8 @@ export default function DetailScreen() {
 			<View>
 				<TopNav>Pengturan</TopNav>
 				<View className="gap-2 p-2">
-					<Link href="/settings/profile" asChild>
-						<Button variant="outline">
-							<Text className="text-xl">Profil</Text>
-						</Button>
-					</Link>
+					<NavBtn href="/settings/profile">Profil</NavBtn>
+					<NavBtn href="/settings/method">Metode Pembayaran</NavBtn>
 				</View>
 			</View>
 			<View className="px-2">
@@ -40,6 +37,16 @@ export default function DetailScreen() {
 				</Button>
 			</View>
 		</SafeAreaView>
+	);
+}
+
+function NavBtn({ href, children }: { href: Href; children: string }) {
+	return (
+		<Link href={href} asChild>
+			<Button variant="outline">
+				<Text className="text-xl">{children}</Text>
+			</Button>
+		</Link>
 	);
 }
 

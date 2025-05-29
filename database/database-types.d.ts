@@ -20,6 +20,12 @@ declare namespace DB {
 		created_at: number;
 	}
 	type Method = "cash" | "transfer" | "debit" | "qris";
+	interface MethodType {
+		id: number;
+		name: string;
+		label: string;
+		method: Method;
+	}
 	interface Cashier {
 		id: number;
 		name: string;
