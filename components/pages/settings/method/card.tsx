@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Save, X } from "lucide-react-native";
+import { Save } from "lucide-react-native";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ActivityIndicator, View } from "react-native";
 import { Field } from "./field";
@@ -8,6 +8,7 @@ import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
 import Toast from "react-native-toast-message";
 import { Show } from "@/components/Show";
+import { DeleteBtn } from "./delete-btn";
 
 type Inputs = {
 	label: string;
@@ -88,9 +89,7 @@ export function Card({ method }: { method: DB.MethodType }) {
 				>
 					<ActivityIndicator size={34} />
 				</Show>
-				<Button size="icon" variant="destructive">
-					<X color="white" />
-				</Button>
+				<DeleteBtn method={method} />
 			</View>
 		</View>
 	);
