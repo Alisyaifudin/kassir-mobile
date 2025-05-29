@@ -7,7 +7,10 @@ import { modeName } from "@/lib/constants";
 import { List } from "./list";
 
 export function Wrapper({ products, mode }: { products: DB.Product[]; mode: Mode }) {
-	const ctx = useItemsLocal(mode, products);
+	const { ready, ...ctx } = useItemsLocal(mode, products);
+	if (!ready) {
+		return null;
+	}
 	return (
 		<ItemProvider value={ctx}>
 			<TopNav>{modeName[mode]}</TopNav>

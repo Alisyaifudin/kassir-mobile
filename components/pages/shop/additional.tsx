@@ -13,17 +13,15 @@ import {
 	SubmitHandler,
 	useForm,
 } from "react-hook-form";
-import { FlatList, View } from "react-native";
+import { View } from "react-native";
 import { z } from "zod";
 import { SelectKind } from "./select-kind";
-import { Additional, calcTotalBeforeAdds, useItems } from "./use-item";
+import { Additional, useItems } from "./use-item";
 import { useDebounceCallback } from "@react-hook/debounce";
 import { Show } from "@/components/Show";
 import { Cond } from "@/components/Cond";
 import { X } from "lucide-react-native";
-// eslint-disable-next-line import/no-named-as-default
-import Decimal from "decimal.js";
-import { Separator } from "@/components/ui/separator";
+import { Field } from "./field";
 
 const schema = z.object({
 	name: z.string().min(1, "Harus ada").trim(),
@@ -50,13 +48,9 @@ export function AdditionalForm({
 	close: () => void;
 	addAdditional: (added: z.infer<typeof schema>) => void;
 }) {
-	const { control, handleSubmit, watch, setValue } = useForm<Inputs>({
+	const { control, handleSubmit } = useForm<Inputs>({
 		defaultValues: { ...emptyFields, kind: "percent" },
 	});
-	const hanldeChangeKind = (v: string) => {
-		const kind = z.enum(["number", "percent"]).catch("percent").parse(v);
-		setValue("kind", kind);
-	};
 	const [error, setError] = useState(emptyFields);
 	const onSubmit: SubmitHandler<Inputs> = async (raw) => {
 		const parsed = schema.safeParse(raw);
@@ -109,7 +103,11 @@ export function AdditionalForm({
 					</Field>
 					<View>
 						<Label>Jenis</Label>
-						<SelectKind kind={watch("kind")} change={hanldeChangeKind} />
+						<Controller
+							name="kind"
+							control={control}
+							render={({ field }) => <SelectKind kind={field.value} change={field.onChange} />}
+						/>
 					</View>
 				</View>
 			</View>
@@ -122,48 +120,20 @@ export function AdditionalForm({
 	);
 }
 
-export function Field<const Inputs extends Record<string, string>>({
-	control,
-	error,
-	label,
-	name,
-	children,
-	className,
-}: {
-	label: string;
-	name: Path<Inputs>;
-	control: Control<Inputs, any, Inputs>;
-	error?: {
-		msg: string;
-		show: boolean;
-	};
-	className?: string;
-	children: (field: ControllerRenderProps<Inputs, Path<Inputs>>) => React.ReactElement;
-}) {
-	return (
-		<View className={className}>
-			<View className="w-full">
-				<Label>{label}</Label>
-			</View>
-			<View className="w-full">
-				<Controller control={control} render={({ field }) => children(field)} name={name} />
-				<TextError when={error !== undefined && error.show}>{error?.msg}</TextError>
-			</View>
-		</View>
-	);
-}
+
 
 export function AdditionalCard({
 	additional,
 	index,
 	effVal,
+	totalAfterAdds,
 }: {
 	additional: Additional;
 	index: number;
 	effVal: number;
+	totalAfterAdds: number;
 }) {
-	const { set } = useItems();
-
+	const { set, additionals } = useItems();
 	const [additionalLocal, setAddsLocal] = useState({
 		name: additional.name,
 		value: additional.value.toString(),
@@ -244,12 +214,24 @@ export function AdditionalCard({
 					<SelectKind kind={additionalLocal.kind} change={changeKind} />
 					<Show when={additional.kind === "percent"}>
 						<View className="flex-row items-center">
-							<Input keyboardType="numeric" value={additionalLocal.value} className="w-[80]" onChangeText={changeValue} />
+							<Input
+								keyboardType="numeric"
+								value={additionalLocal.value}
+								className="w-[80]"
+								onChangeText={changeValue}
+							/>
 							<Text className="text-xl"> %</Text>
 						</View>
 					</Show>
 				</View>
 			</View>
+			<Show when={index === additionals.length - 1}>
+				<View className="mt-5 items-end">
+					<Text className="font-bold text-xl">
+						Total: Rp{totalAfterAdds.toLocaleString("id-ID")}
+					</Text>
+				</View>
+			</Show>
 		</>
 	);
 }

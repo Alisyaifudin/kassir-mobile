@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { produce } from "immer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { z } from "zod";
-import { numeric } from "@/lib/utils";
+import { integer, Method, numeric } from "@/lib/utils";
 // eslint-disable-next-line import/no-named-as-default
 import Decimal from "decimal.js";
 
@@ -34,6 +34,7 @@ export type Disc = z.infer<typeof discSchema>;
 export type Additional = z.infer<typeof additionalSchema>;
 
 export function useItemsLocal(mode: Mode, products: DB.Product[]) {
+	const [ready, setReady] = useState(false);
 	const [items, setItems] = useState<Item[]>([]);
 	const [additionals, setAdditionals] = useState<Additional[]>([]);
 	const [fix, setFix] = useState(0);
@@ -42,12 +43,21 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 		value: 0,
 	});
 	const [round, setRound] = useState(0);
-	const [method, setMethod] = useState("cash"); // TODO
+	const [method, setMethod] = useState<Method>("cash");
 
 	useEffect(() => {
-		getItemsLocal(mode).then((items) => setItems(items));
-		getFixLocal(mode).then((fix) => setFix(fix));
-		getAdditionals(mode).then((adds) => setAdditionals(adds));
+		async function get() {
+			const [items, fix, adds] = await Promise.all([
+				getItemsLocal(mode),
+				getFixLocal(mode),
+				getAdditionals(mode),
+			]);
+			setItems(items);
+			setFix(fix);
+			setAdditionals(adds);
+			setReady(true);
+		}
+		get();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 	const itemsSet = {
@@ -204,8 +214,10 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 			},
 		},
 	};
-	const changeFix = (fix: number) => {
-		setFix(fix);
+	const changeFix = (fix: string) => {
+		const v = integer.catch(0).parse(fix);
+		setFix(v);
+		setFixLocal(mode, v);
 	};
 	const additionalsSet = {
 		name: (index: number, val: string) => {
@@ -276,12 +288,23 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 			setDisc((prev) => ({ ...prev, kind }));
 		},
 	};
+	const changeRound = (round: number) => {
+		setRound(round);
+	};
+	const changeMethod = (method: Method) => {
+		setMethod(method);
+	};
 	const val = {
+		ready,
 		fix,
 		items,
 		disc,
+		method,
+		round,
 		additionals,
 		set: {
+			method: changeMethod,
+			round: changeRound,
 			disc: changeDisc,
 			additionals: {
 				name: additionalsSet.name,
@@ -310,11 +333,15 @@ const ItemContext = createContext<null | {
 	items: Item[];
 	additionals: Additional[];
 	fix: number;
+	round: number;
+	method: Method;
 	disc: {
 		kind: "number" | "percent";
 		value: number;
 	};
 	set: {
+		method: (method: Method) => void;
+		round: (round: number) => void;
 		disc: {
 			value: (val: string) => void;
 			kind: (val: string) => void;
@@ -347,7 +374,7 @@ const ItemContext = createContext<null | {
 				value(itemIndex: number, discIndex: number, val: string): void;
 			};
 		};
-		fix: (fix: number) => void;
+		fix: (fix: string) => void;
 	};
 }>(null);
 
@@ -397,10 +424,17 @@ async function getFixLocal(mode: Mode): Promise<number> {
 	}
 }
 
+async function setFixLocal(mode: Mode, fix: number) {
+	try {
+		await AsyncStorage.setItem(`${mode}-fix`, fix.toString());
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 async function getAdditionals(mode: Mode): Promise<Additional[]> {
 	try {
 		const raw = await AsyncStorage.getItem(`${mode}-additionals`);
-		console.log({ raw });
 		if (raw === null) return [];
 		const obj = JSON.parse(raw);
 		const val = additionalSchema.array().parse(obj);
@@ -442,11 +476,12 @@ export function calcSubTotal(item: Item, fix: number) {
 }
 
 export function calcTotalBeforeAdds(items: Item[], disc: Disc, fix: number) {
-	let total = new Decimal(0);
+	let sub = new Decimal(0);
 	for (const item of items) {
 		const { subtotal } = calcSubTotal(item, fix);
-		total = total.add(subtotal);
+		sub = sub.add(subtotal);
 	}
+	let total = sub;
 	switch (disc.kind) {
 		case "number":
 			total = total.minus(disc.value);
@@ -456,7 +491,7 @@ export function calcTotalBeforeAdds(items: Item[], disc: Disc, fix: number) {
 			total = total.minus(num);
 			break;
 	}
-	return total;
+	return { totalBeforeAdds: total, subtotal: sub };
 }
 
 export function calcEffectiveAdds(total: Decimal, fix: number, additionals: Additional[]) {

@@ -1,6 +1,3 @@
-export const mig01 = `PRAGMA journal_mode = 'wal';
-BEGIN TRANSACTION;
-
 CREATE TABLE images (
   uri TEXT PRIMARY KEY
 ) STRICT;
@@ -13,6 +10,3 @@ CREATE TABLE product_images (
   height INTEGER NOT NULL,
   created_at INTEGER NOT NULL
 ) STRICT;
-
-COMMIT;
-`

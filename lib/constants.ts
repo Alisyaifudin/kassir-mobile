@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export const NAV_THEME = {
 	light: {
 		background: "hsl(0 0% 100%)", // background
@@ -37,3 +39,14 @@ export const modeName = {
 	sell: "Jual",
 	buy: "Beli",
 } as const;
+
+export const METHODS = ["cash", "transfer", "debit", "qris"] as const;
+export type Method = (typeof METHODS)[number];
+export const methodNames = {
+	cash: "Tunai",
+	transfer: "Transfer",
+	debit: "Debit",
+	qris: "QRIS",
+} as const;
+
+export const DAY_IN_MS = 24 * 3600 * 1000; // ms

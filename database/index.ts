@@ -1,11 +1,13 @@
 import { type SQLiteDatabase } from "expo-sqlite";
 import { ProductTable } from "./tables/products";
 import { ProductImageTable } from "./tables/product-images";
+import { CashierTable } from "./tables/cashiers";
 
 export function generateDB(db: SQLiteDatabase) {
 	return {
 		product: new ProductTable(db),
-		productImage: new ProductImageTable(db)
+		productImage: new ProductImageTable(db),
+		cashier: new CashierTable(db),
 	};
 }
 

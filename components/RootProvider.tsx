@@ -1,11 +1,10 @@
 import { Database, generateDB } from "@/database";
 import { useSQLiteContext } from "expo-sqlite";
 
-import { createContext, useEffect, useState } from "react";
-
-export const Context = createContext<{
-	db: Database;
-} | null>(null);
+import { useEffect, useState } from "react";
+import { Auth } from "./Auth";
+import { Login } from "./Login";
+import { Context } from "@/hooks/useDB";
 
 export function RootProvider({ children }: { children: React.ReactNode }) {
 	const [db, setDB] = useState<null | Database>(null);
@@ -17,5 +16,9 @@ export function RootProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, [dbRaw]);
 	if (db === null) return null;
-	return <Context.Provider value={{ db }}>{children}</Context.Provider>;
+	return (
+		<Context.Provider value={{ db }}>
+			<Auth Login={<Login />}>{children}</Auth>
+		</Context.Provider>
+	);
 }

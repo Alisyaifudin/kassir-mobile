@@ -13,10 +13,11 @@ import { Menu } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
 import { z } from "zod";
-import { AdditionalForm, Field } from "./additional";
+import { AdditionalForm } from "./additional";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useItems } from "./use-item";
+import { Field } from "./field";
 
 const tabSchema = z.enum(["manual", "additional"]);
 

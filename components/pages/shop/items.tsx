@@ -1,9 +1,7 @@
 import { Cond } from "@/components/Cond";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { FlatList, TouchableOpacity, View } from "react-native";
-// eslint-disable-next-line import/no-named-as-default
-import Decimal from "decimal.js";
+import { TouchableOpacity, View } from "react-native";
 import { X } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { calcSubTotal, Disc, type Item, useItems } from "./use-item";
@@ -12,8 +10,18 @@ import { z } from "zod";
 import { DiscountBtn } from "./discount";
 import { Show } from "@/components/Show";
 
-export function ItemCard({ item, index }: { item: Item; index: number }) {
-	const { set, fix } = useItems();
+export function ItemCard({
+	item,
+	index,
+	totalBeforeAdds,
+	subtotal: sub,
+}: {
+	item: Item;
+	index: number;
+	subtotal: number;
+	totalBeforeAdds: number;
+}) {
+	const { set, fix, items } = useItems();
 	const [itemLocal, setItemLocal] = useState({
 		name: item.name,
 		barcode: item.barcode ?? "",
@@ -91,58 +99,79 @@ export function ItemCard({ item, index }: { item: Item; index: number }) {
 	};
 	const { discVals, subtotal } = calcSubTotal(item, fix);
 	return (
-		<View className="flex gap-1 bg-zinc-50 p-0.5 mt-1 shadow-black shadow-md">
-			<View className="flex flex-row gap-1 items-center pl-1">
-				<Text>{index + 1}.</Text>
-				<Cond
-					when={item.id === null}
-					fallback={
-						<View className="flex-1 h-11 justify-center px-3">
-							<Text className="native:text-lg">{item.name}</Text>
-						</View>
-					}
-				>
-					<Input value={itemLocal.name} className="flex-1" onChangeText={changeName} />
-				</Cond>
-				<TouchableOpacity onPress={handleRemove} className="bg-red-500 rounded-full">
-					<X color="white" />
-				</TouchableOpacity>
-			</View>
-			<View className="gap-1 flex-row">
-				<View style={{ flex: 3 }}>
-					<Text className="native:text-xs">Barcode:</Text>
+		<>
+			<View className="flex gap-1 bg-zinc-50 p-0.5 mt-1 shadow-black shadow-md">
+				<View className="flex flex-row gap-1 items-center pl-1">
+					<Text>{index + 1}.</Text>
 					<Cond
 						when={item.id === null}
 						fallback={
-							<View className="h-11 justify-center px-3">
-								<Text className="native:text-lg">{item.barcode ?? "--------"}</Text>
+							<View className="flex-1 h-11 justify-center px-3">
+								<Text className="native:text-lg">{item.name}</Text>
 							</View>
 						}
 					>
-						<Input value={itemLocal.barcode} onChangeText={changeBarcode} />
+						<Input value={itemLocal.name} className="flex-1" onChangeText={changeName} />
 					</Cond>
+					<TouchableOpacity onPress={handleRemove} className="bg-red-500 rounded-full">
+						<X color="white" />
+					</TouchableOpacity>
 				</View>
-				<View style={{ flex: 2 }}>
-					<Text className="native:text-xs">Harga:</Text>
-					<Input
-						keyboardType="numeric"
-						value={itemLocal.price.toString()}
-						onChangeText={changePrice}
-					/>
+				<View className="gap-1 flex-row">
+					<View style={{ flex: 3 }}>
+						<Text className="native:text-xs">Barcode:</Text>
+						<Cond
+							when={item.id === null}
+							fallback={
+								<View className="h-11 justify-center px-3">
+									<Text className="native:text-lg">{item.barcode ?? "--------"}</Text>
+								</View>
+							}
+						>
+							<Input value={itemLocal.barcode} onChangeText={changeBarcode} />
+						</Cond>
+					</View>
+					<View style={{ flex: 2 }}>
+						<Text className="native:text-xs">Harga:</Text>
+						<Input
+							keyboardType="numeric"
+							value={itemLocal.price.toString()}
+							onChangeText={changePrice}
+						/>
+					</View>
+					<View style={{ flex: 1 }}>
+						<Text className="native:text-xs">Qty:</Text>
+						<Input
+							keyboardType="numeric"
+							value={itemLocal.qty.toString()}
+							onChangeText={changeQty}
+						/>
+					</View>
 				</View>
-				<View style={{ flex: 1 }}>
-					<Text className="native:text-xs">Qty:</Text>
-					<Input keyboardType="numeric" value={itemLocal.qty.toString()} onChangeText={changeQty} />
+				<Show when={item.discs.length > 0}>
+					<Discount discVals={discVals} discs={item.discs} />
+				</Show>
+				<View className="flex flex-row justify-between items-center">
+					<DiscountBtn index={index} item={item} />
+					<Text className="text-xl">Total: {subtotal.toNumber().toLocaleString("id-ID")}</Text>
 				</View>
 			</View>
-			<Show when={item.discs.length > 0}>
-				<Discount discVals={discVals} discs={item.discs} />
+			<Show when={index === items.length - 1}>
+				<View className="items-end mt-5">
+					<Show when={sub !== totalBeforeAdds}>
+						<Text className="text-xl">
+							Subtotal: Rp{sub.toLocaleString("id-ID")}
+						</Text>
+						<Text className="text-xl">
+							Potongan: Rp{(sub - totalBeforeAdds).toLocaleString("id-ID")}
+						</Text>
+					</Show>
+					<Text className="font-bold text-xl">
+						Total: Rp{totalBeforeAdds.toLocaleString("id-ID")}
+					</Text>
+				</View>
 			</Show>
-			<View className="flex flex-row justify-between items-center">
-				<DiscountBtn index={index} item={item} />
-				<Text className="text-xl">Subtotal: {subtotal.toNumber().toLocaleString("id-ID")}</Text>
-			</View>
-		</View>
+		</>
 	);
 }
 

@@ -17,8 +17,8 @@ type Content =
 
 export function List() {
 	const { items, additionals, fix, disc } = useItems();
-	const totalBeforeAdds = calcTotalBeforeAdds(items, disc, fix);
-	const { totalAfterAdds, addsVals } = calcEffectiveAdds(totalBeforeAdds, fix, additionals);
+	const {totalBeforeAdds, subtotal} = calcTotalBeforeAdds(items, disc, fix);
+	const { addsVals, totalAfterAdds } = calcEffectiveAdds(totalBeforeAdds, fix, additionals);
 	const list: Content[] = [];
 	let index = 0;
 	for (const item of items) {
@@ -36,7 +36,7 @@ export function List() {
 			additional,
 			index,
 		});
-    index++;
+		index++;
 	}
 	return (
 		<FlatList
@@ -49,10 +49,18 @@ export function List() {
 								additional={item.additional}
 								effVal={addsVals[item.index]}
 								index={item.index}
+								totalAfterAdds={totalAfterAdds.toNumber()}
 							/>
 						);
 					case "item":
-						return <ItemCard index={item.index} item={item.item} />;
+						return (
+							<ItemCard
+								index={item.index}
+								item={item.item}
+								subtotal={subtotal.toNumber()}
+								totalBeforeAdds={totalBeforeAdds.toNumber()}
+							/>
+						);
 				}
 			}}
 			keyExtractor={(item) => {

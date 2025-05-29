@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { COLOR } from "@/lib/constants";
 import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
+import { SummaryBtn } from "./summary";
 
 export function TopNav({ children }: { children: string }) {
 	const router = useRouter();
@@ -18,9 +18,7 @@ export function TopNav({ children }: { children: string }) {
 				</Pressable>
 				<Text style={styles.title}>{children}</Text>
 			</View>
-			<Button className="native:py-0">
-				<Text className="native:text-xl">Bayar</Text>
-			</Button>
+			<SummaryBtn />
 		</View>
 	);
 }

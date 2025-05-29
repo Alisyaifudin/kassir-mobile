@@ -1,5 +1,9 @@
-import { Context } from "@/components/RootProvider";
-import { useContext } from "react";
+import { Database } from "@/database";
+import { createContext, useContext } from "react";
+
+export const Context = createContext<{
+	db: Database;
+} | null>(null);
 
 export function useDB() {
 	const v = useContext(Context);

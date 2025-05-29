@@ -6,8 +6,9 @@ import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 
 export default function RootLayout() {
+	
 	return (
-		<SQLiteProvider databaseName="data.db" onInit={migrateDbIfNeeded}>
+		<SQLiteProvider databaseName="database.db" onInit={migrateDbIfNeeded}>
 			<RootProvider>
 				<Stack
 					screenOptions={{
