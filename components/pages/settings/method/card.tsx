@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Save, X } from "lucide-react-native";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { Field } from "./field";
 import { Input } from "@/components/ui/input";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
 import Toast from "react-native-toast-message";
+import { Show } from "@/components/Show";
 
 type Inputs = {
 	label: string;
@@ -77,9 +78,16 @@ export function Card({ method }: { method: DB.MethodType }) {
 				</Field>
 			</View>
 			<View className="gap-3">
-				<Button size="icon" onPress={handleSubmit(onSubmit)}>
-					<Save color="white" />
-				</Button>
+				<Show
+					when={loading}
+					fallback={
+						<Button size="icon" onPress={handleSubmit(onSubmit)}>
+							<Save color="white" />
+						</Button>
+					}
+				>
+					<ActivityIndicator size={34} />
+				</Show>
 				<Button size="icon" variant="destructive">
 					<X color="white" />
 				</Button>
