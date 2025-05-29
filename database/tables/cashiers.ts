@@ -65,17 +65,17 @@ export class CashierTable {
 		name: string;
 		password: string;
 		role: Role;
-	}): Promise<"Aplikasi bermasalah" | null> {
+	}): Promise<Result<"Aplikasi bermasalah", number>> {
 		try {
 			const hash = await crypt.hash(cashier.password);
-			await this.#db.runAsync(
+			const res = await this.#db.runAsync(
 				"INSERT INTO cashiers (name, password, role) VALUES ($name, $hash, $role)",
 				{ $name: cashier.name, $hash: hash, $role: cashier.role }
 			);
-			return null;
+			return ok(res.lastInsertRowId);
 		} catch (error) {
 			console.error(error);
-			return "Aplikasi bermasalah";
+			return err("Aplikasi bermasalah");
 		}
 	}
 }

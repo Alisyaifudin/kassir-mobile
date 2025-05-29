@@ -26,10 +26,14 @@ export namespace Session {
 			return "Aplikasi bermasalah";
 		}
 	}
-	export async function login(name: string, role: Role): Promise<"Aplikasi bermasalah" | null> {
+	export async function login(
+		id: number,
+		name: string,
+		role: Role
+	): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			const now = Temporal.Now.instant().epochMilliseconds;
-			const errMsg = await store({ name, role, exp: now + 5 * DAY_IN_MS });
+			const errMsg = await store({ name, role, exp: now + 5 * DAY_IN_MS, id });
 			return errMsg;
 		} catch (error) {
 			console.error(error);
@@ -44,8 +48,7 @@ export namespace Session {
 			const session = sessionSchema.parse(sessionObj);
 			const now = Temporal.Now.instant().epochMilliseconds;
 			if (now > session.exp) {
-				await SecureStore.deleteItemAsync("session");
-				return null;
+				throw new Error("expired");
 			}
 			if (now > session.exp - 2 * DAY_IN_MS) {
 				session.exp = now + 5 * DAY_IN_MS;
@@ -53,6 +56,7 @@ export namespace Session {
 			}
 			return session;
 		} catch (error) {
+			await SecureStore.deleteItemAsync("session");
 			console.error(error);
 			return null;
 		}
@@ -60,6 +64,7 @@ export namespace Session {
 }
 
 const sessionSchema = z.object({
+	id: z.number().int(),
 	name: z.string(),
 	role: z.enum(["user", "admin", "manager"]),
 	exp: z.number(),
