@@ -15,6 +15,7 @@ import { useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { Password } from "@/components/ui/password";
+import Toast from "react-native-toast-message";
 
 export function PasswordForm() {
 	const { session } = useSession();
@@ -26,7 +27,15 @@ export function PasswordForm() {
 	const handleSubmit = async () => {
 		const errMsg = await action(password);
 		setError(errMsg);
-    setPassword("")
+		if (errMsg === null) {
+			if (errMsg === null) {
+				Toast.show({
+					type: "success",
+					text1: "Berhasil disimpan",
+				});
+			}
+			setPassword("");
+		}
 	};
 	return (
 		<Accordion type="single" collapsible className="w-full max-w-sm native:max-w-full px-2">

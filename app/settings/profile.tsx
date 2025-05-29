@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TopNav } from "@/components/TopNav";
@@ -13,6 +13,7 @@ import { TextError } from "@/components/TextError";
 import { Button } from "@/components/ui/button";
 import { Show } from "@/components/Show";
 import { PasswordForm } from "@/components/pages/settings/profile/password";
+import Toast from "react-native-toast-message";
 
 type Inputs = {
 	name: string;
@@ -37,6 +38,12 @@ export default function Page() {
 		setError(errMsg);
 		const errSession = await set.name(name);
 		setError(errSession);
+		if (errSession === null) {
+			Toast.show({
+				type: "success",
+				text1: "Berhasil disimpan",
+			});
+		}
 	};
 	return (
 		<SafeAreaView className="flex-1 justify-between">
@@ -52,6 +59,7 @@ export default function Page() {
 								value={field.value}
 								onChangeText={field.onChange}
 								onBlur={field.onBlur}
+								onSubmitEditing={handleSubmit(onSubmit)}
 							/>
 						)}
 						name="name"
