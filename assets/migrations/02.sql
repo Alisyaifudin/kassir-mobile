@@ -48,7 +48,7 @@ CREATE TABLE records (
   cashier TEXT NOT NULL,
   mode TEXT NOT NULL REFERENCES modes(mode),
   pay REAL NOT NULL,
-  method TEXT NOT NULL REFERENCES method_types(id),
+  method INTEGER REFERENCES method_types(id),
   note TEXT NOT NULL DEFAULT ''
 ) STRICT;
 

@@ -43,7 +43,7 @@ declare namespace DB {
 		credit: 0 | 1;
 		mode: Mode;
 		pay: number;
-		method: number;
+		method: number | null; // method_type id
 		note: string;
 	}
 	interface RecordItem {
@@ -71,14 +71,24 @@ declare namespace DB {
 		kind: DiscKind;
 		eff_value: number;
 	}
+	type MoneyKind = "saving" | "debt";
+	interface Money {
+		timestamp: number;
+		value: number;
+		kind: MoneyKind;
+	}
+	interface Social {
+		id: number;
+		name: string;
+		value: string;
+	}
 }
 
 type Mode = "buy" | "sell";
 type Role = "admin" | "manager" | "user";
 type DiscKind = "number" | "percent";
 
-
-declare module '*.sql' {
-  const content: string;
-  export default content;
+declare module "*.sql" {
+	const content: string;
+	export default content;
 }

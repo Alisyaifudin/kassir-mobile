@@ -12,6 +12,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		new Migration(0, await loadMigrationFile(require("../assets/migrations/00.sql"))),
 		new Migration(1, await loadMigrationFile(require("../assets/migrations/01.sql"))),
 		new Migration(2, await loadMigrationFile(require("../assets/migrations/02.sql"))),
+		new Migration(3, await loadMigrationFile(require("../assets/migrations/03.sql"))),
 	];
 	const DATABASE_VERSION = migrations.length;
 	let version = await db.getFirstAsync<{ user_version: number }>("PRAGMA user_version");
@@ -22,8 +23,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 	if (currentDbVersion >= DATABASE_VERSION) {
 		return;
 	}
-	// console.log("=======================================")
-	// console.log("current", currentDbVersion);
 	await db.execAsync("PRAGMA journal_mode = 'wal'");
 	currentDbVersion = await runMigration(db, currentDbVersion, migrations);
 	await db.execAsync(`PRAGMA user_version = ${currentDbVersion}`);
