@@ -22,6 +22,7 @@ export default function DetailScreen() {
 				<TopNav>Pengturan</TopNav>
 				<View className="gap-2 p-2">
 					<NavBtn href="/settings/profile">Profil</NavBtn>
+					<NavBtn href="/settings/shop">Toko</NavBtn>
 					<NavBtn href="/settings/method">Metode Pembayaran</NavBtn>
 				</View>
 			</View>

@@ -24,8 +24,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		return;
 	}
 	await db.execAsync("PRAGMA journal_mode = 'wal'");
-	currentDbVersion = await runMigration(db, currentDbVersion, migrations);
-	await db.execAsync(`PRAGMA user_version = ${currentDbVersion}`);
+	await runMigration(db, currentDbVersion, migrations);
 }
 async function loadMigrationFile(assetModule: any): Promise<string> {
 	try {
@@ -46,14 +45,14 @@ async function runMigration(
 	db: SQLiteDatabase,
 	currentDbVersion: number,
 	migs: Migration[]
-): Promise<number> {
+) {
 	for (const mig of migs) {
 		if (currentDbVersion === mig.version) {
 			await db.withTransactionAsync(async () => {
 				await db.execAsync(mig.file);
+				currentDbVersion = mig.version + 1;
+				await db.execAsync(`PRAGMA user_version = ${currentDbVersion}`);
 			});
-			currentDbVersion = mig.version + 1;
 		}
 	}
-	return currentDbVersion;
 }

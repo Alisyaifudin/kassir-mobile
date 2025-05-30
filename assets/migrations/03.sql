@@ -13,5 +13,5 @@ INSERT INTO money_kinds VALUES ('saving'), ('debt');
 CREATE TABLE money (
   timestamp INTEGER PRIMARY KEY,
   value REAL NOT NULL,
-  kind NOT NULL REFERENCES money_kinds(kind)
+  kind TEXT NOT NULL REFERENCES money_kinds(kind)
 ) STRICT;
