@@ -42,7 +42,7 @@ export function DeleteBtn({ social }: { social: DB.Social }) {
 			</DialogTrigger>
 			<DialogContent className="max-w-full w-full min-w-full mb-36">
 				<DialogHeader>
-					<DialogTitle>Hapus Metode</DialogTitle>
+					<DialogTitle>Hapus Kontak</DialogTitle>
 					<DialogDescription>
 						{">"} Nama: {social.name}
 					</DialogDescription>
