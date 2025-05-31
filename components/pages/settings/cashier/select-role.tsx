@@ -17,7 +17,7 @@ import Toast from "react-native-toast-message";
 
 export const roleLabel = {
 	manager: "Manajer",
-	user: "Pengguna",
+	user: "Biasa",
 	admin: "Admin",
 } as const;
 

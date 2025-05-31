@@ -11,6 +11,8 @@ import { Calendar } from "@/components/Calendar";
 import { View } from "react-native";
 import { emitter } from "@/lib/event-emitter";
 import { useAsyncDep } from "@/hooks/useAsyncDep";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
 
 export default function Page() {
 	const [tab, setTab] = useState<DB.MoneyKind>("saving");
@@ -29,6 +31,12 @@ export default function Page() {
 		const end = start.add(Temporal.Duration.from({ months: 1 })).epochMilliseconds;
 		return end;
 	}, [start]);
+	const handleNext = () => {
+		setStart(start.add(Temporal.Duration.from({ months: 1 })));
+	};
+	const handlePrev = () => {
+		setStart(start.subtract(Temporal.Duration.from({ months: 1 })));
+	};
 	const handleChangeTime = (v: number) => {
 		const time = Temporal.Instant.fromEpochMilliseconds(v).toZonedDateTimeISO(tz).startOfDay();
 		const startOfMonth = Temporal.ZonedDateTime.from({
@@ -44,7 +52,15 @@ export default function Page() {
 		<SafeAreaView className="flex-1">
 			<TopNav>Uang</TopNav>
 			<View className="p-2 flex-1">
-				<Calendar time={start.epochMilliseconds} onChange={handleChangeTime} mode="month" />
+				<View className="flex-row items-center gap-3">
+					<Button onPress={handlePrev} size="icon">
+						<ChevronLeft color="white" />
+					</Button>
+					<Calendar time={start.epochMilliseconds} onChange={handleChangeTime} mode="month" />
+					<Button onPress={handleNext} size="icon">
+						<ChevronRight color="white" />
+					</Button>
+				</View>
 				<Await state={state}>
 					{(money) => (
 						<Tabs
