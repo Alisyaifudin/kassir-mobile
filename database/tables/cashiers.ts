@@ -28,44 +28,49 @@ export class CashierTable {
 			return err("Aplikasi bermasalah");
 		}
 	}
-	async updateRole(id: number, role: Role): Promise<"Aplikasi bermasalah" | null> {
-		try {
-			await this.#db.runAsync("UPDATE cashiers SET role = $role WHERE id = $id", {
-				$id: id,
-				$role: role,
-			});
-			return null;
-		} catch (error) {
-			console.error(error);
-			return "Aplikasi bermasalah";
-		}
+	get update() {
+		return {
+			db: this.#db,
+			async name(id: number, name: string): Promise<"Aplikasi bermasalah" | null> {
+				try {
+					await this.db.runAsync("UPDATE cashiers SET name = $name WHERE id = $id", {
+						$id: id,
+						$name: name,
+					});
+					return null;
+				} catch (error) {
+					console.error(error);
+					return "Aplikasi bermasalah";
+				}
+			},
+			async password(id: number, password: string): Promise<"Aplikasi bermasalah" | null> {
+				try {
+					const hash = await crypt.hash(password);
+					await this.db.runAsync("UPDATE cashiers SET password = $hash WHERE id = $id", {
+						$id: id,
+						$hash: hash,
+					});
+					return null;
+				} catch (error) {
+					console.error(error);
+					return "Aplikasi bermasalah";
+				}
+			},
+			async role(id: number, role: Role): Promise<"Aplikasi bermasalah" | null> {
+				try {
+					await this.db.runAsync("UPDATE cashiers SET role = $role WHERE id = $id", {
+						$id: id,
+						$role: role,
+					});
+					return null;
+				} catch (error) {
+					console.error(error);
+					return "Aplikasi bermasalah";
+				}
+			},
+		};
 	}
-	async updateName(id: number, name: string): Promise<"Aplikasi bermasalah" | null> {
-		try {
-			await this.#db.runAsync("UPDATE cashiers SET name = $name WHERE id = $id", {
-				$id: id,
-				$name: name,
-			});
-			return null;
-		} catch (error) {
-			console.error(error);
-			return "Aplikasi bermasalah";
-		}
-	}
-	async updatePassword(id: number, password: string): Promise<"Aplikasi bermasalah" | null> {
-		try {
-			const hash = await crypt.hash(password);
-			await this.#db.runAsync("UPDATE cashiers SET password = $hash WHERE id = $id", {
-				$id: id,
-				$hash: hash,
-			});
-			return null;
-		} catch (error) {
-			console.error(error);
-			return "Aplikasi bermasalah";
-		}
-	}
-	async del(id: number): Promise<"Aplikasi bermasalah" | null> {
+	async delete(id: number): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.runAsync("DELETE FROM cashiers WHERE id = ? AND role != 'admin'", id);
 			return null;

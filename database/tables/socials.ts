@@ -37,7 +37,7 @@ export class SocialTable {
 			return "Aplikasi bermasalah";
 		}
 	}
-	async del(id: number): Promise<"Aplikasi bermasalah" | null> {
+	async delete(id: number): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.runAsync("DELETE FROM socials WHERE id = ?", id);
 			return null;

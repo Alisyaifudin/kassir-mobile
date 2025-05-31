@@ -26,7 +26,7 @@ export default function Page() {
 	});
 	const db = useDB();
 	const { error, loading, setError, action } = useAction("", (name: string) => {
-		return db.cashier.updateName(session.id, name);
+		return db.cashier.update.name(session.id, name);
 	});
 	const onSubmit: SubmitHandler<Inputs> = async (raw) => {
 		const { name } = raw;

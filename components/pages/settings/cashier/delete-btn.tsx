@@ -1,0 +1,71 @@
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { useAction } from "@/hooks/useAction";
+import { useDB } from "@/hooks/useDB";
+import { emitter } from "@/lib/event-emitter";
+import { useState } from "react";
+import { ActivityIndicator } from "react-native";
+import { Text } from "@/components/ui/text";
+import { X } from "lucide-react-native";
+import { Button } from "@/components/ui/button";
+import { Show } from "@/components/Show";
+import { TextError } from "@/components/TextError";
+import { roleLabel } from "./select-role";
+
+export function DeleteBtn({ cashier }: { cashier: DB.Cashier }) {
+	const db = useDB();
+	const [open, setOpen] = useState(false);
+	const { error, loading, setError, action } = useAction("", async () =>
+		db.cashier.delete(cashier.id)
+	);
+	const handleSubmit = async () => {
+		const errMsg = await action();
+		setError(errMsg);
+		if (errMsg === null) {
+			setOpen(false);
+			emitter.emit("fetch-cashiers");
+		}
+	};
+	return (
+		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
+			<DialogTrigger asChild>
+				<Button variant="destructive" size="icon">
+					<X color="white" />
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="max-w-full w-full min-w-full mb-36">
+				<DialogHeader>
+					<DialogTitle>Hapus Metode</DialogTitle>
+					<DialogDescription>
+						{">"} Nama: {cashier.name}
+					</DialogDescription>
+					<DialogDescription>
+						{">"} Peran: {roleLabel[cashier.role]}
+					</DialogDescription>
+					<TextError when={error !== null}>{error}</TextError>
+				</DialogHeader>
+				<DialogFooter className="flex flex-row justify-between">
+					<DialogClose asChild>
+						<Button variant="secondary">
+							<Text>Batal</Text>
+						</Button>
+					</DialogClose>
+					<Button variant="destructive" onPress={handleSubmit} className="flex flex-row gap-2">
+						<Show when={loading}>
+							<ActivityIndicator color="white" />
+						</Show>
+						<Text>Hapus</Text>
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}

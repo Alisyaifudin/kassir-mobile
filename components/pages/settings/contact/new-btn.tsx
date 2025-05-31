@@ -21,38 +21,38 @@ import { Button } from "@/components/ui/button";
 import { Show } from "@/components/Show";
 
 type Inputs = {
-	label: string;
+	value: string;
 	name: string;
 };
 
-export function NewBtn({ method }: { method: DB.Method }) {
+export function NewBtn() {
 	const db = useDB();
 	const { handleSubmit, control, reset } = useForm<Inputs>();
 	const [open, setOpen] = useState(false);
 	const { error, loading, setError, action } = useAction(
-		{ label: "", name: "" },
-		async (data: { name: string; label: string }) => db.method.insert(data.name, data.label, method)
+		{ value: "", name: "" },
+		async (data: { name: string; value: string }) => db.social.insert(data.name, data.value)
 	);
 	const onSubmit: SubmitHandler<Inputs> = async (raw) => {
-		const { name, label } = raw;
-		const errs = { label: "", name: "" };
+		const { name, value } = raw;
+		const errs = { value: "", name: "" };
 		if (name.trim() === "") {
 			errs.name = "Harus ada";
 		}
-		if (label.trim() === "") {
+		if (value.trim() === "") {
 			errs.name = "Harus ada";
 		}
-		if (errs.label !== "" || errs.name !== "") {
+		if (errs.value !== "" || errs.name !== "") {
 			setError(errs);
 			return;
 		}
-		const errMsg = await action({ name: raw.name, label: raw.label });
+		const errMsg = await action({ name, value });
 		if (errMsg === null) {
-			emitter.emit("fetch-methods");
+			emitter.emit("fetch-socials");
 			setOpen(false);
 			reset();
 		} else {
-			setError({ name: "", label: errMsg });
+			setError({ name: "", value: errMsg });
 		}
 	};
 	return (
@@ -70,9 +70,9 @@ export function NewBtn({ method }: { method: DB.Method }) {
 						error={{ show: error !== null && error.name !== "", msg: error?.name ?? "" }}
 						desc={
 							<View>
-								<Text className="text-sm text-muted-foreground">Nama metode pembayaran.</Text>
+								<Text className="text-sm text-muted-foreground">Nama kontak.</Text>
 								<Text className="text-sm text-muted-foreground">
-									Contoh: DANA Ali, DANA Adam, dll...
+									Contoh: Instagram, WA, Shopee, dll...
 								</Text>
 							</View>
 						}
@@ -83,16 +83,16 @@ export function NewBtn({ method }: { method: DB.Method }) {
 					</Field>
 					<Field
 						control={control}
-						name="label"
-						label="Label"
-						error={{ show: error !== null && error.label !== "", msg: error?.label ?? "" }}
+						name="value"
+						label="Isian"
+						error={{ show: error !== null && error.value !== "", msg: error?.value ?? "" }}
 						desc={
 							<View>
 								<Text className="text-sm text-muted-foreground">
-									Label metode pembayaran pada struk.
+									Isian dari kontak.
 								</Text>
 								<Text className="text-sm text-muted-foreground">
-									Contoh: DANA, BCA, BRI, dll...
+									Contoh: @alisyaifudin, 08123456789, dll...
 								</Text>
 							</View>
 						}

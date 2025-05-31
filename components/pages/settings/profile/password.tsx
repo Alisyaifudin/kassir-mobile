@@ -22,7 +22,7 @@ export function PasswordForm() {
 	const [password, setPassword] = useState("");
 	const db = useDB();
 	const { error, loading, setError, action } = useAction("", (password: string) => {
-		return db.cashier.updatePassword(session.id, password);
+		return db.cashier.update.password(session.id, password);
 	});
 	const handleSubmit = async () => {
 		const errMsg = await action(password);

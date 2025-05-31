@@ -134,43 +134,21 @@ export function dateToEpoch(date: string): number {
 	return t;
 }
 
-export function constructCSV<T extends Record<string, any>>(data: T[]): string {
-	if (data.length === 0) return "";
-
-	const headers = Object.keys(data[0]) as (keyof T)[];
-	const delimiter = ",";
-	const lineBreak = "\n";
-
-	// Escape CSV special characters (commas, quotes, newlines)
-	const escapeCSV = (value: unknown): string => {
-		if (value === null || value === undefined) return "";
-		const str = String(value);
-		if (str.includes(delimiter) || str.includes('"') || str.includes(lineBreak)) {
-			return `"${str.replace(/"/g, '""')}"`;
-		}
-		return str;
-	};
-
-	const lines: string[] = [];
-
-	// Add header row
-	lines.push(headers.map((header) => escapeCSV(header)).join(delimiter));
-
-	// Add data rows
-	for (const item of data) {
-		const row = headers.map((header) => escapeCSV(item[header]));
-		lines.push(row.join(delimiter));
-	}
-
-	return lines.join(lineBreak);
-}
-
-export function getBackURL(defaultURL: string, search: URLSearchParams) {
-	const parsed = z.string().safeParse(search.get("url_back"));
-	const urlBack = parsed.success ? parsed.data : defaultURL;
-	return urlBack;
-}
+// export function getBackURL(defaultURL: string, search: URLSearchParams) {
+// 	const parsed = z.string().safeParse(search.get("url_back"));
+// 	const urlBack = parsed.success ? parsed.data : defaultURL;
+// 	return urlBack;
+// }
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
+}
+
+export function foldMap<T>(array: T[], chunkSize: number): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        const chunk = array.slice(i, i + chunkSize);
+        result.push(chunk);
+    }
+    return result;
 }
