@@ -26,6 +26,7 @@ export default function DetailScreen() {
 					<NavBtn href="/settings/contact">Kontak</NavBtn>
 					<NavBtn href="/settings/data">Data</NavBtn>
 					<NavBtn href="/settings/cashier">Kasir</NavBtn>
+					<NavBtn href="/settings/money">Uang</NavBtn>
 					<NavBtn href="/settings/method">Metode Pembayaran</NavBtn>
 				</View>
 			</View>

@@ -290,7 +290,6 @@ function Content({
 								<ChevronRight size={35} color="white" />
 							</Button>
 						</View>
-						<View className="w-32 h-32 bg-black"></View>
 					</DialogHeader>
 					<View className="gap-1">
 						{foldMap(
