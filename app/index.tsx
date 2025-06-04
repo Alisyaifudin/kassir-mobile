@@ -1,9 +1,9 @@
 import { Href, Link } from "expo-router";
 import {
 	// Banknote,
-	Box,
+	// Box,
 	// ChartArea,
-	Hamburger,
+	// Hamburger,
 	// NotepadText,
 	// PersonStanding,
 	Settings,
@@ -21,7 +21,7 @@ export default function HomeScreen() {
 			</View>
 			<View style={styles.container}>
 				<View style={styles.apps}>
-					<View style={styles.grid}>
+					{/* <View style={styles.grid}>
 						<Button href="/sell">
 							<Hamburger size={64} />
 							<Text>Jual</Text>
@@ -30,7 +30,7 @@ export default function HomeScreen() {
 							<Box size={64} />
 							<Text>Beli</Text>
 						</Button>
-					</View>
+					</View> */}
 					<View style={styles.grid}>
 						<Button href="/stock">
 							<Warehouse size={64} />
