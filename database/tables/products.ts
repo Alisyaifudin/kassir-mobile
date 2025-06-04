@@ -63,7 +63,7 @@ export class ProductTable {
 			}
 		}
 		try {
-			await this.#db.runAsync(
+			const res = await this.#db.runAsync(
 				`INSERT INTO products (name, stock, price, barcode, capital, note) 
 			 VALUES ($1, $2, $3, $4, $5, $6)`,
 				{
@@ -75,6 +75,17 @@ export class ProductTable {
 					$6: data.note,
 				}
 			);
+			if (this.#caches["all"] !== null) {
+				this.#caches["all"].push({
+					id: res.lastInsertRowId,
+					name: data.name.trim(),
+					barcode: data.barcode === null ? null : data.barcode.trim(),
+					stock: data.stock,
+					price: data.price,
+					capital: data.capital,
+					note: data.note,
+				});
+			}
 			return null;
 		} catch (error) {
 			console.error(error);
@@ -121,6 +132,20 @@ export class ProductTable {
 					$id: id,
 				}
 			);
+			if (this.#caches["all"] !== null) {
+				const itemIndex = this.#caches.all.findIndex((p) => p.id === id);
+				if (itemIndex !== -1) {
+					this.#caches.all[itemIndex] = {
+						id: id,
+						name: data.name.trim(),
+						barcode: data.barcode === null ? null : data.barcode.trim(),
+						stock: data.stock,
+						price: data.price,
+						capital: data.capital,
+						note: data.note,
+					};
+				}
+			}
 			return null;
 		} catch (error) {
 			console.error(error);
@@ -128,15 +153,15 @@ export class ProductTable {
 		}
 	}
 	async delete(id: number): Promise<"Aplikasi bermasalah" | null> {
-		const statement = await this.#db.prepareAsync("DELETE FROM products WHERE id = $id");
 		try {
-			await statement.executeAsync<DB.Product>({ $id: id });
+			await this.#db.runAsync("DELETE FROM products WHERE id = ?", id);
+			if (this.#caches.all !== null) {
+				this.#caches.all = this.#caches.all.filter((p) => p.id !== id);
+			}
+			return null;
 		} catch (error) {
 			console.error(error);
 			return "Aplikasi bermasalah";
-		} finally {
-			await statement.finalizeAsync();
 		}
-		return null;
 	}
 }

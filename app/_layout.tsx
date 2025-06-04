@@ -20,6 +20,7 @@ export default function RootLayout() {
 					<Stack.Screen name="stock" />
 					<Stack.Screen name="sell" />
 					<Stack.Screen name="records" />
+					<Stack.Screen name="money" />
 					<Stack.Screen name="settings" />
 				</Stack>
 				<PortalHost />

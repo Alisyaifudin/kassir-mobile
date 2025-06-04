@@ -8,19 +8,15 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Text } from "@/components/ui/text";
-import { Plus, X } from "lucide-react-native";
 import { View } from "react-native";
-import { calcEffectiveAdds, calcTotalBeforeAdds, Item, useItems } from "./use-item";
+import { calcEffectiveAdds, calcTotalBeforeAdds, useItems } from "./use-item";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { useDebounceCallback } from "@react-hook/debounce";
-import { produce } from "immer";
 import { SelectKind } from "./select-kind";
 import { Field } from "./field";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { SelectFix } from "./select-fix";
 import { cn } from "@/lib/utils";
+import { SelectMethod } from "./select-method";
 
 type Inputs = {
 	discVal: string;
@@ -28,6 +24,7 @@ type Inputs = {
 	fix: string;
 	round: string;
 	pay: string;
+	method: DB.MethodType | null;
 };
 
 const emptyFields = {
@@ -36,13 +33,17 @@ const emptyFields = {
 	fix: "",
 	round: "",
 	pay: "",
+	method: "",
 };
 
-export function SummaryBtn() {
+export function SummaryBtn({ methods }: { methods: DB.MethodType[] }) {
 	const { items, additionals, fix, disc, set } = useItems();
 	const { control, handleSubmit, watch } = useForm<Inputs>({
-		defaultValues: { ...emptyFields, fix: fix.toString(), discKind: "percent" },
+		defaultValues: { ...emptyFields, method: null, fix: fix.toString(), discKind: "percent" },
 	});
+	const onSubmit: SubmitHandler<Inputs> = async (raw) => {
+		
+	}
 	const { totalBeforeAdds } = calcTotalBeforeAdds(items, disc, fix);
 	const { totalAfterAdds } = calcEffectiveAdds(totalBeforeAdds, fix, additionals);
 	const round = isNaN(Number(watch("round"))) ? 0 : Number(watch("round"));
@@ -59,22 +60,7 @@ export function SummaryBtn() {
 			<DialogContent overlayClass="justify-start" className="max-w-full w-full min-w-full  mt-7">
 				<DialogHeader>
 					<DialogTitle>Rangkuman</DialogTitle>
-					<View className="flex-row items-center gap-2">
-						<Label>Akurasi desimal</Label>
-						<Controller
-							name="fix"
-							control={control}
-							render={({ field }) => (
-								<SelectFix
-									fix={field.value}
-									change={(fix) => {
-										set.fix(fix);
-										field.onChange(fix);
-									}}
-								/>
-							)}
-						/>
-					</View>
+					
 					<View className="items-center gap-2 border py-0.5 rounded-md border-border">
 						<Text className="font-bold text-xl">TOTAL</Text>
 						<Text className="text-5xl">Rp{total.toNumber().toLocaleString("id-ID")}</Text>
@@ -103,7 +89,7 @@ export function SummaryBtn() {
 										set.disc.value(val);
 										onChange(val);
 									}}
-									value={value}
+									value={value as string}
 								/>
 							)}
 						</Field>
@@ -131,7 +117,12 @@ export function SummaryBtn() {
 						// error={{ show: error.barcode !== "", msg: error.barcode }}
 					>
 						{({ onBlur, onChange, value }) => (
-							<Input keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+							<Input
+								keyboardType="numeric"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value as string}
+							/>
 						)}
 					</Field>
 					<Field
@@ -141,11 +132,33 @@ export function SummaryBtn() {
 						// error={{ show: error.barcode !== "", msg: error.barcode }}
 					>
 						{({ onBlur, onChange, value }) => (
-							<Input keyboardType="numeric" onBlur={onBlur} onChangeText={onChange} value={value} />
+							<Input
+								keyboardType="numeric"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value as string}
+							/>
 						)}
 					</Field>
+					<View className="flex-row items-center gap-2">
+						<Label>Metode</Label>
+						<Controller
+							name="method"
+							control={control}
+							render={({ field }) => (
+								<SelectMethod
+									methods={methods}
+									method={field.value as DB.MethodType}
+									change={(type) => {
+										set.method(type);
+										field.onChange(type);
+									}}
+								/>
+							)}
+						/>
+					</View>
 					<View className="items-center gap-2 border py-0.5 rounded-md border-border">
-						<Text className="font-bold text-xl">KEMBALIAN</Text>
+						<Text className="font-bold text-lg">KEMBALIAN</Text>
 						<Text className={cn("text-4xl", { "text-red-500": change < 0 })}>
 							Rp{change.toLocaleString("id-ID")}
 						</Text>

@@ -43,7 +43,6 @@ export function DeleteItemBtn({ product }: { product: DB.Product }) {
 		setError(errMsg);
 		if (errMsg === null) {
 			setError(null);
-			db.product.revalidate("all");
 			emitter.emit("fetch-products");
 			router.back();
 		}

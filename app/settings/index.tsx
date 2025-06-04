@@ -6,12 +6,10 @@ import { Text } from "@/components/ui/text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
 	ArrowRightLeft,
-	Banknote,
 	BookUser,
 	CircleHelp,
 	Database,
 	LogOut,
-	PersonStanding,
 	Store,
 	User,
 } from "lucide-react-native";
@@ -20,6 +18,7 @@ import { Session } from "@/lib/auth";
 import { Show } from "@/components/Show";
 import { emitter } from "@/lib/event-emitter";
 import React from "react";
+import { SelectFix } from "@/components/pages/settings/select-fix";
 
 export default function DetailScreen() {
 	const { action, loading } = useAction("", () => Session.logout());
@@ -44,12 +43,6 @@ export default function DetailScreen() {
 					<NavBtn icon={<Database />} href="/settings/data">
 						Data
 					</NavBtn>
-					<NavBtn icon={<PersonStanding />} href="/settings/cashier">
-						Kasir
-					</NavBtn>
-					<NavBtn icon={<Banknote />} href="/settings/money">
-						Uang
-					</NavBtn>
 					<NavBtn icon={<ArrowRightLeft />} href="/settings/method">
 						Metode Pembayaran
 					</NavBtn>
@@ -58,7 +51,8 @@ export default function DetailScreen() {
 					</NavBtn>
 				</View>
 			</View>
-			<View className="px-2">
+			<View className="px-2 gap-2">
+				<SelectFix />
 				<Button onPress={handleLogout} className="flex-row gap-3 items-center justify-between">
 					<View className="flex-row gap-3">
 						<Text>Keluar</Text>

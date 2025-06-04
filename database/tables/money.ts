@@ -1,5 +1,5 @@
 /* eslint-disable import/no-named-as-default */
-import { err, formatDate, ok, Result } from "@/lib/utils";
+import { err, ok, Result } from "@/lib/utils";
 import Decimal from "decimal.js";
 import { type SQLiteDatabase } from "expo-sqlite";
 import { Temporal } from "temporal-polyfill";
@@ -16,7 +16,6 @@ export class MoneyTable {
 				start,
 				end
 			);
-			console.log("refetch", formatDate(start, "long"));
 			return ok(res);
 		} catch (error) {
 			console.error(error);

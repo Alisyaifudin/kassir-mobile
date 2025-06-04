@@ -1,5 +1,15 @@
 import { Href, Link } from "expo-router";
-import { Box, Hamburger, NotepadText, Settings, Warehouse } from "lucide-react-native";
+import {
+	Banknote,
+	Box,
+	ChartArea,
+	Hamburger,
+	NotepadText,
+	PersonStanding,
+	Settings,
+	Target,
+	Warehouse,
+} from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -8,11 +18,6 @@ export default function HomeScreen() {
 		<SafeAreaView style={styles.root}>
 			<View style={styles.header}>
 				<TextHeader>Kassir</TextHeader>
-				<Link href="/settings" asChild>
-					<TouchableOpacity style={styles.setting}>
-						<Settings size={24} />
-					</TouchableOpacity>
-				</Link>
 			</View>
 			<View style={styles.container}>
 				<View style={styles.apps}>
@@ -25,15 +30,37 @@ export default function HomeScreen() {
 							<Box size={64} />
 							<Text>Beli</Text>
 						</Button>
-					</View>
-					<View style={styles.grid}>
 						<Button href="/stock">
 							<Warehouse size={64} />
 							<Text>Stok</Text>
 						</Button>
+					</View>
+					<View style={styles.grid}>
 						<Button href="/records">
 							<NotepadText size={64} />
 							<Text>Riwayat</Text>
+						</Button>
+						<Button href="/stock">
+							<ChartArea size={64} />
+							<Text>Analisa</Text>
+						</Button>
+						<Button href="/stock">
+							<Target size={64} />
+							<Text>Barang</Text>
+						</Button>
+					</View>
+					<View style={styles.grid}>
+						<Button href="/money">
+							<Banknote size={64} />
+							<Text>Uang</Text>
+						</Button>
+						<Button href="/cashier">
+							<PersonStanding size={64} />
+							<Text>Kasir</Text>
+						</Button>
+						<Button href="/settings">
+							<Settings size={64} />
+							<Text>Pengaturan</Text>
 						</Button>
 					</View>
 				</View>

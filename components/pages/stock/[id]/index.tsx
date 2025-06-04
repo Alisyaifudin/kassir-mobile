@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
-import { emitter } from "@/lib/event-emitter";
 import { integer, numeric } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -129,8 +128,6 @@ export function Form({ product }: { product: DB.Product }) {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
-			db.product.revalidate("all");
-			emitter.emit("fetch-products");
 			router.back();
 		}
 	};

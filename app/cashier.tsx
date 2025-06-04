@@ -5,8 +5,8 @@ import { View } from "react-native";
 import { useAsync } from "@/hooks/useAsync";
 import { Await } from "@/components/Await";
 import { useDB } from "@/hooks/useDB";
-import { Card } from "@/components/pages/settings/cashier/card";
-import { NewBtn } from "@/components/pages/settings/cashier/new-btn";
+import { Card } from "@/components/pages/cashier/card";
+import { NewBtn } from "@/components/pages/cashier/new-btn";
 import { FAB } from "@/components/Fab";
 
 export default function Page() {

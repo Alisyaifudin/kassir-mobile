@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Temporal } from "temporal-polyfill";
 import { useDB } from "@/hooks/useDB";
 import { Await } from "@/components/Await";
-import { MoneyList } from "@/components/pages/settings/money/list";
+import { MoneyList } from "@/components/pages/money/list";
 import { Calendar } from "@/components/Calendar";
 import { View } from "react-native";
 import { emitter } from "@/lib/event-emitter";

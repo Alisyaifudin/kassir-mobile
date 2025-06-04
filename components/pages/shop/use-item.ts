@@ -2,9 +2,10 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { produce } from "immer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { z } from "zod";
-import { integer, Method, numeric } from "@/lib/utils";
+import { numeric } from "@/lib/utils";
 // eslint-disable-next-line import/no-named-as-default
 import Decimal from "decimal.js";
+import { getFixLocal } from "../settings/select-fix";
 
 const discSchema = z.object({
 	kind: z.enum(["percent", "number"]),
@@ -43,13 +44,13 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 		value: 0,
 	});
 	const [round, setRound] = useState(0);
-	const [method, setMethod] = useState<Method>("cash");
+	const [method, setMethod] = useState<DB.MethodType | null>(null); // null means cash
 
 	useEffect(() => {
 		async function get() {
 			const [items, fix, adds] = await Promise.all([
 				getItemsLocal(mode),
-				getFixLocal(mode),
+				getFixLocal(),
 				getAdditionals(mode),
 			]);
 			setItems(items);
@@ -214,11 +215,6 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 			},
 		},
 	};
-	const changeFix = (fix: string) => {
-		const v = integer.catch(0).parse(fix);
-		setFix(v);
-		setFixLocal(mode, v);
-	};
 	const additionalsSet = {
 		name: (index: number, val: string) => {
 			setAdditionals((prev) =>
@@ -291,7 +287,7 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 	const changeRound = (round: number) => {
 		setRound(round);
 	};
-	const changeMethod = (method: Method) => {
+	const changeMethod = (method: DB.MethodType | null) => {
 		setMethod(method);
 	};
 	const val = {
@@ -323,7 +319,6 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 				qty: itemsSet.qty,
 				disc: itemsSet.disc,
 			},
-			fix: changeFix,
 		},
 	};
 	return val;
@@ -334,13 +329,13 @@ const ItemContext = createContext<null | {
 	additionals: Additional[];
 	fix: number;
 	round: number;
-	method: Method;
+	method: DB.MethodType | null;
 	disc: {
 		kind: "number" | "percent";
 		value: number;
 	};
 	set: {
-		method: (method: Method) => void;
+		method: (method: DB.MethodType | null) => void;
 		round: (round: number) => void;
 		disc: {
 			value: (val: string) => void;
@@ -374,7 +369,6 @@ const ItemContext = createContext<null | {
 				value(itemIndex: number, discIndex: number, val: string): void;
 			};
 		};
-		fix: (fix: string) => void;
 	};
 }>(null);
 
@@ -406,27 +400,6 @@ async function setItemsLocal(mode: Mode, items: Item[]) {
 	try {
 		const json = JSON.stringify(items);
 		await AsyncStorage.setItem(`${mode}-items`, json);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-async function getFixLocal(mode: Mode): Promise<number> {
-	try {
-		const raw = await AsyncStorage.getItem(`${mode}-fix`);
-		const num = Number(raw);
-		if (raw === null || isNaN(num) || !Number.isInteger(num)) return 0;
-		return num;
-	} catch (error) {
-		console.error(error);
-		await AsyncStorage.removeItem(`${mode}-fix`);
-		return 0;
-	}
-}
-
-async function setFixLocal(mode: Mode, fix: number) {
-	try {
-		await AsyncStorage.setItem(`${mode}-fix`, fix.toString());
 	} catch (error) {
 		console.error(error);
 	}

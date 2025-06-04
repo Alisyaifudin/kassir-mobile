@@ -4,9 +4,14 @@ import { useRouter } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SummaryBtn } from "./summary";
+import { useAsync } from "@/hooks/useAsync";
+import { useDB } from "@/hooks/useDB";
+import { Await } from "@/components/Await";
 
 export function TopNav({ children }: { children: string }) {
 	const router = useRouter();
+	const db = useDB();
+	const state = useAsync(() => db.method.get());
 	const handlePress = () => {
 		router.back();
 	};
@@ -18,7 +23,7 @@ export function TopNav({ children }: { children: string }) {
 				</Pressable>
 				<Text style={styles.title}>{children}</Text>
 			</View>
-			<SummaryBtn />
+			<Await state={state}>{(methods) => <SummaryBtn methods={methods} />}</Await>
 		</View>
 	);
 }
