@@ -1,7 +1,7 @@
 {
   "name": "kassir-mobile",
   "main": "expo-router/entry",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -32,6 +32,7 @@
     "expo": "~53.0.9",
     "expo-asset": "~11.1.5",
     "expo-blur": "~14.1.4",
+    "expo-camera": "~16.1.6",
     "expo-constants": "~17.1.6",
     "expo-crypto": "~14.1.4",
     "expo-file-system": "~18.1.10",

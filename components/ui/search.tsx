@@ -7,7 +7,6 @@ import { Show } from "../Show";
 
 const Search = React.forwardRef<React.ComponentRef<typeof TextInput>, TextInputProps>(
 	({ className, placeholderClassName, value, onChangeText, ...props }, ref) => {
-		console.log(value);
 		return (
 			<View className="w-full native:h-12 h-10 flex-1 flex-row items-center">
 				<TextInput

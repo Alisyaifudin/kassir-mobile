@@ -1,13 +1,13 @@
 import { Href, Link } from "expo-router";
 import {
-	Banknote,
+	// Banknote,
 	Box,
-	ChartArea,
+	// ChartArea,
 	Hamburger,
-	NotepadText,
-	PersonStanding,
+	// NotepadText,
+	// PersonStanding,
 	Settings,
-	Target,
+	// Target,
 	Warehouse,
 } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -30,12 +30,18 @@ export default function HomeScreen() {
 							<Box size={64} />
 							<Text>Beli</Text>
 						</Button>
+					</View>
+					<View style={styles.grid}>
 						<Button href="/stock">
 							<Warehouse size={64} />
 							<Text>Stok</Text>
 						</Button>
+						<Button href="/settings">
+							<Settings size={64} />
+							<Text>Pengaturan</Text>
+						</Button>
 					</View>
-					<View style={styles.grid}>
+					{/* <View style={styles.grid}>
 						<Button href="/records">
 							<NotepadText size={64} />
 							<Text>Riwayat</Text>
@@ -48,8 +54,8 @@ export default function HomeScreen() {
 							<Target size={64} />
 							<Text>Barang</Text>
 						</Button>
-					</View>
-					<View style={styles.grid}>
+					</View> */}
+					{/* <View style={styles.grid}>
 						<Button href="/money">
 							<Banknote size={64} />
 							<Text>Uang</Text>
@@ -62,7 +68,7 @@ export default function HomeScreen() {
 							<Settings size={64} />
 							<Text>Pengaturan</Text>
 						</Button>
-					</View>
+					</View> */}
 				</View>
 			</View>
 		</SafeAreaView>

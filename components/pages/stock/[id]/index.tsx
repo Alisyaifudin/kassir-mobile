@@ -21,6 +21,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-nat
 import { z } from "zod";
 import { DeleteItemBtn } from "./delete-btn";
 import { ImageDetail } from "./image";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
 
 export function Tab({ product }: { product: DB.Product }) {
 	const [tab, setTab] = useState<"form" | "image">("form");
@@ -186,7 +187,10 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error.barcode !== "", msg: error?.barcode ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					<View className="flex-row gap-1 items-center">
+						<Input className="flex-1" onBlur={onBlur} onChangeText={onChange} value={value} />
+						<BarcodeScanner onScan={onChange} />
+					</View>
 				)}
 			</Field>
 			<Field

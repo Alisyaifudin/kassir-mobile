@@ -1,3 +1,4 @@
+import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { Show } from "@/components/Show";
 import { TextError } from "@/components/TextError";
 import { TopNav } from "@/components/TopNav";
@@ -150,7 +151,10 @@ export default function Page() {
 					error={{ show: error !== null && error.barcode !== "", msg: error?.barcode ?? "" }}
 				>
 					{({ onBlur, onChange, value }) => (
-						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+						<View className="flex-row gap-1 items-center">
+							<Input className="flex-1" onBlur={onBlur} onChangeText={onChange} value={value} />
+							<BarcodeScanner onScan={onChange} />
+						</View>
 					)}
 				</Field>
 				<Field
