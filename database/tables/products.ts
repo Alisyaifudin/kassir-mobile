@@ -47,7 +47,7 @@ export class ProductTable {
 		capital: number;
 		barcode: string | null;
 		note: string;
-	}): Promise<"Aplikasi bermasalah" | "Barang sudah ada" | null> {
+	}): Promise<Result<"Aplikasi bermasalah" | "Barang sudah ada", number>> {
 		if (data.barcode !== null) {
 			try {
 				const product = await this.#db.getFirstAsync<{ name: string }>(
@@ -55,11 +55,11 @@ export class ProductTable {
 					data.barcode.trim()
 				);
 				if (product !== null) {
-					return "Barang sudah ada";
+					return err("Barang sudah ada");
 				}
 			} catch (error) {
 				console.error(error);
-				return "Aplikasi bermasalah";
+				return err("Aplikasi bermasalah");
 			}
 		}
 		try {
@@ -86,10 +86,10 @@ export class ProductTable {
 					note: data.note,
 				});
 			}
-			return null;
+			return ok(res.lastInsertRowId)
 		} catch (error) {
 			console.error(error);
-			return "Aplikasi bermasalah";
+			return err("Aplikasi bermasalah");
 		}
 	}
 	async edit(
@@ -105,11 +105,11 @@ export class ProductTable {
 	): Promise<"Aplikasi bermasalah" | "Barang sudah ada" | null> {
 		if (data.barcode !== null) {
 			try {
-				const product = await this.#db.getFirstAsync<{ name: string }>(
-					"SELECT name FROM products WHERE barcode = ?",
+				const product = await this.#db.getFirstAsync<{ id: number }>(
+					"SELECT id FROM products WHERE barcode = ?",
 					data.barcode.trim()
 				);
-				if (product !== null) {
+				if (product !== null && product.id !== id) {
 					return "Barang sudah ada";
 				}
 			} catch (error) {
@@ -143,6 +143,28 @@ export class ProductTable {
 						price: data.price,
 						capital: data.capital,
 						note: data.note,
+					};
+				}
+			}
+			return null;
+		} catch (error) {
+			console.error(error);
+			return "Aplikasi bermasalah";
+		}
+	}
+	async update(mode: Mode, data: { id: number; qty: number }): Promise<"Aplikasi bermasalah" | null> {
+		const sign = mode === "buy" ? "+" : "-"
+		try {
+			await this.#db.runAsync(`UPDATE products SET stock = stock ${sign} $qty WHERE id = $id`, {
+				$qty: data.qty,
+				$id: data.id,
+			});
+			if (this.#caches["all"] !== null) {
+				const itemIndex = this.#caches.all.findIndex((p) => p.id === data.id);
+				if (itemIndex !== -1) {
+					this.#caches.all[itemIndex] = {
+						...this.#caches.all[itemIndex],
+						stock: this.#caches.all[itemIndex].stock + data.qty * (mode === "buy" ? 1 : -1),
 					};
 				}
 			}

@@ -45,6 +45,7 @@ declare namespace DB {
 		pay: number;
 		method: number | null; // method_type id
 		note: string;
+		cashier: string;
 	}
 	interface RecordItem {
 		id: number;

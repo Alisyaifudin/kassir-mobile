@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
+import { emitter } from "@/lib/event-emitter";
 import { integer, numeric } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -86,11 +87,12 @@ export default function Page() {
 			});
 			return;
 		}
-		const errMsg = await action(parsed.data);
+		const [errMsg] = await action(parsed.data);
 		if (errMsg) {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
+			emitter.emit("fetch-products");
 			router.back();
 		}
 	};

@@ -162,7 +162,7 @@ function FreshForm() {
 					<Show when={loading}>
 						<ActivityIndicator color="white" />
 					</Show>
-					<Text>Button</Text>
+					<Text>Masuk</Text>
 				</Button>
 			</View>
 		</View>

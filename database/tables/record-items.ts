@@ -1,5 +1,5 @@
 import { err, ok, Result } from "@/lib/utils";
-import { type SQLiteDatabase } from "expo-sqlite";
+import { SQLiteRunResult, type SQLiteDatabase } from "expo-sqlite";
 
 export class RecordItemTable {
 	#db: SQLiteDatabase;
@@ -49,6 +49,36 @@ export class RecordItemTable {
 		}
 	}
 	async addMany(
+		items: Omit<DB.RecordItem, "id" | "timestamp">[],
+		timestamp: number
+	): Promise<Result<"Aplikasi bermasalah", number[]>> {
+		try {
+			const promises: Promise<SQLiteRunResult>[] = [];
+			for (const item of items) {
+				promises.push(
+					this.#db.runAsync(
+						`INSERT INTO record_items (timestamp, name, price, qty, disc_val, capital, product_id)
+				 VALUES ($timestamp, $name, $price, $qty, $disc_val, $capital, $product_id)`,
+						{
+							$timestamp: timestamp,
+							$name: item.name.trim(),
+							$price: item.price,
+							$qty: item.qty,
+							$disc_val: item.disc_val,
+							$capital: item.capital,
+							$product_id: item.product_id,
+						}
+					)
+				);
+			}
+			const res = await Promise.all(promises);
+			return ok(res.map((r) => r.lastInsertRowId));
+		} catch (error) {
+			console.error(error);
+			return err("Aplikasi bermasalah");
+		}
+	}
+	async addManyTransaction(
 		items: Omit<DB.RecordItem, "id" | "timestamp">[],
 		timestamp: number
 	): Promise<Result<"Aplikasi bermasalah", number[]>> {

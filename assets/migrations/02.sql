@@ -38,7 +38,7 @@ CREATE TABLE method_types (
 
 CREATE TABLE records (
   timestamp INTEGER PRIMARY KEY,
-  total_before_disc REAL NOT NULL,
+  total_from_items REAL NOT NULL,
   disc_val REAL NOT NULL,
   disc_eff_val REAL NOT NULL,
   disc_kind TEXT NOT NULL REFERENCES disc_kinds(kind),

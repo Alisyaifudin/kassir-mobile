@@ -22,6 +22,7 @@ import { z } from "zod";
 import { DeleteItemBtn } from "./delete-btn";
 import { ImageDetail } from "./image";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { emitter } from "@/lib/event-emitter";
 
 export function Tab({ product }: { product: DB.Product }) {
 	const [tab, setTab] = useState<"form" | "image">("form");
@@ -129,6 +130,7 @@ export function Form({ product }: { product: DB.Product }) {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
+			emitter.emit("fetch-products");
 			router.back();
 		}
 	};

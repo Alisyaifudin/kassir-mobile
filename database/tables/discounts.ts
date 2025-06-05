@@ -36,6 +36,10 @@ export class DiscountTable {
 		itemId: number,
 		discounts: { value: number; kind: DiscKind; effValue: number }[]
 	): Promise<"Aplikasi bermasalah" | null> {
+		if (discounts.length === 0) {
+			console.error("Empty discounts");
+			return "Aplikasi bermasalah";
+		}
 		try {
 			const bindings: SQLiteBindValue[] = [];
 			const stmts: string[] = [];
@@ -45,6 +49,7 @@ export class DiscountTable {
 			}
 			const stmt =
 				`INSERT INTO discounts (record_item_id, value, kind, eff_value) VALUES ` + stmts.join(", ");
+			console.log("statement:", stmt);
 			await this.#db.runAsync(stmt, bindings);
 			return null;
 		} catch (error) {

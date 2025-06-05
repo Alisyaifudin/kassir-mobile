@@ -56,9 +56,9 @@ export class RecordTable {
 		try {
 			await this.#db.runAsync(
 				`INSERT INTO records (timestamp, total_from_items, total_additional, disc_val, 
-				 disc_eff_val, disc_kind, rounding, credit, mode, pay, method, note)
+				 disc_eff_val, disc_kind, rounding, credit, mode, pay, method, note, cashier, pay)
 				 VALUES ($timestamp, $total_from_items, $total_additional, $disc_val, $disc_eff_val, 
-				 $disc_kind, $rounding, $credit, $mode, $pay, $method, $note)`,
+				 $disc_kind, $rounding, $credit, $mode, $pay, $method, $note, $cashier, $pay)`,
 				{
 					$timestamp: timestamp,
 					$total_from_items: data.total_from_items,
@@ -71,6 +71,8 @@ export class RecordTable {
 					$mode: mode,
 					$method: data.method,
 					$note: data.note,
+					$pay: data.pay,
+					$cashier: data.cashier,
 				}
 			);
 			return null;

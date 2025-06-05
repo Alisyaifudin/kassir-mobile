@@ -22,7 +22,7 @@ export function generateDB(db: SQLiteDatabase) {
 		recordItem: new RecordItemTable(db),
 		record: new RecordTable(db),
 		social: new SocialTable(db),
-		transaction: db.withTransactionAsync
+		raw: db
 	};
 }
 

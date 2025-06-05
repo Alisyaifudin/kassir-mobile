@@ -290,7 +290,14 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 	const changeMethod = (method: DB.MethodType | null) => {
 		setMethod(method);
 	};
+	const reset = () => {
+		setItems([]);
+		setAdditionals([]);
+		setItemsLocal(mode, []);
+		setAdditionalsLocal(mode, []);
+	};
 	const val = {
+		reset,
 		ready,
 		fix,
 		items,
@@ -325,6 +332,8 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 }
 
 const ItemContext = createContext<null | {
+	reset: () => void;
+	mode: Mode;
 	items: Item[];
 	additionals: Additional[];
 	fix: number;

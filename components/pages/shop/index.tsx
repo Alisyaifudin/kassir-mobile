@@ -12,7 +12,7 @@ export function Wrapper({ products, mode }: { products: DB.Product[]; mode: Mode
 		return null;
 	}
 	return (
-		<ItemProvider value={ctx}>
+		<ItemProvider value={{...ctx, mode}}>
 			<TopNav>{modeName[mode]}</TopNav>
 			<View className="px-2 flex flex-col gap-2 flex-1">
 				<SearchItems products={products} />
