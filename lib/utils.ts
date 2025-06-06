@@ -6,14 +6,13 @@ import { twMerge } from "tailwind-merge";
 
 export const version = "2.12.5";
 
-export const METHODS = ["cash", "transfer", "debit", "qris", "other"] as const;
+export const METHODS = ["cash", "transfer", "debit", "qris"] as const;
 export type Method = (typeof METHODS)[number];
 export const METHOD_NAMES = {
 	cash: "Tunai",
 	transfer: "Transfer",
 	debit: "Debit",
 	qris: "QRIS",
-	other: "Lainnya",
 } as const;
 
 // export const log = logTauri;

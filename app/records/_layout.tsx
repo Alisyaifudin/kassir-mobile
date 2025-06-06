@@ -8,8 +8,7 @@ export default function RootLayout() {
 			}}
 		>
 			<Stack.Screen name="index" />
-			<Stack.Screen name="new-item" />
-			<Stack.Screen name="[id]" />
+			<Stack.Screen name="[timestamp]" />
 		</Stack>
 	);
 }
