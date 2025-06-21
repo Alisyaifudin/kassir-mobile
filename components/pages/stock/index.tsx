@@ -2,7 +2,8 @@ import { COLOR } from "@/lib/constants";
 import { Link } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
-export function Item({ name, price, id, capital, barcode, stock }: DB.Product) {
+export function Item({ item }: { item: DB.Product }) {
+	const { name, barcode, capital, id, price, stock } = item;
 	return (
 		<Link
 			href={{
@@ -17,10 +18,16 @@ export function Item({ name, price, id, capital, barcode, stock }: DB.Product) {
 				</Text>
 				<View style={styles.desc}>
 					<View style={styles.prices}>
-						<Text selectable>Harga: {price.toLocaleString("id-ID")}</Text>
+						<Text selectable>
+							Harga:
+							{price.toLocaleString("id-ID")}
+						</Text>
 					</View>
 					<View style={styles.prices}>
-						<Text selectable>Modal: {capital.toLocaleString("id-ID")}</Text>
+						<Text selectable>
+							Modal:
+							{capital.toLocaleString("id-ID")}
+						</Text>
 					</View>
 					<View style={styles["stock-container"]}>
 						<Text selectable style={styles.stock}>
@@ -66,7 +73,7 @@ const styles = StyleSheet.create({
 		width: "20%",
 		display: "flex",
 		justifyContent: "flex-end",
-    paddingRight: 5,
+		paddingRight: 5,
 	},
 	stock: {
 		textAlign: "right",

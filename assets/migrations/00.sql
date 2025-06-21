@@ -3,7 +3,7 @@ CREATE TABLE products (
   name TEXT NOT NULL,
   price REAL NOT NULL,
   stock INTEGER NOT NULL,
-  barcode TEXT,
+  barcode TEXT UNIQUE,
   capital REAL NOT NULL DEFAULT 0,
   note TEXT NOT NULL DEFAULT ''
 ) STRICT;

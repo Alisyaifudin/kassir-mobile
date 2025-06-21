@@ -8,8 +8,9 @@ import { useDB } from "@/hooks/useDB";
 import { Temporal } from "temporal-polyfill";
 import Toast from "react-native-toast-message";
 import { TextError } from "@/components/TextError";
+import { uploadProduct, validate } from "./upload-product";
 
-export function Product() {
+export function ProductDownload() {
 	const db = useDB();
 	const { loading, error, setError, action } = useAction("", async () => {
 		const [errProduct, products] = await db.product.getAll();
@@ -35,6 +36,44 @@ export function Product() {
 				<Text className="italic text-xl">Produk</Text>
 				<Button onPress={handleClick} className="flex-row gap-2 items-center">
 					<Text>Unduh</Text>
+					<Show when={loading}>
+						<ActivityIndicator color="white" />
+					</Show>
+				</Button>
+			</View>
+			<TextError when={error !== null && error !== ""}>{error}</TextError>
+		</View>
+	);
+}
+
+export function ProductUpload() {
+	const db = useDB();
+	const { loading, error, setError, action } = useAction("", (products: DB.Product[]) =>
+		db.product.insertMany(products)
+	);
+	const handleClick = async () => {
+		const [errUpload, raw] = await uploadProduct(); // implement this function
+		if (errUpload !== null) {
+			setError(errUpload);
+			return;
+		}
+		const [errVal, products] = validate(raw); // given
+		if (errVal !== null) {
+			setError(errVal);
+			return;
+		}
+		const errMsg = await action(products);
+		setError(errMsg);
+		if (errMsg === null) {
+			console.log("Successfull");
+		}
+	};
+	return (
+		<View className="flex gap-2 p-2 bg-sky-50">
+			<View className="gap-2 flex-row justify-between items-center">
+				<Text className="italic text-xl">Produk</Text>
+				<Button onPress={handleClick} className="flex-row gap-2 items-center">
+					<Text>Unggah</Text>
 					<Show when={loading}>
 						<ActivityIndicator color="white" />
 					</Show>

@@ -85,7 +85,7 @@ function Wrapper({
 			<Search query={query ?? ""} setQuery={setQuery} />
 			<FlatList
 				data={products}
-				renderItem={({ item }) => <Item {...item} />}
+				renderItem={({ item }) => <Item item={item} />}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerStyle={{
 					paddingBottom: 100,

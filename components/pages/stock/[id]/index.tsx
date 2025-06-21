@@ -22,6 +22,8 @@ import { z } from "zod";
 import { DeleteItemBtn } from "./delete-btn";
 import { ImageDetail } from "./image";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { emitter } from "@/lib/event-emitter";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
 
 export function Tab({ product }: { product: DB.Product }) {
 	const [tab, setTab] = useState<"form" | "image">("form");
@@ -129,6 +131,7 @@ export function Form({ product }: { product: DB.Product }) {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
+			emitter.emit("fetch-products");
 			router.back();
 		}
 	};
@@ -141,7 +144,7 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error.name !== "", msg: error?.name ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+					<Input returnKeyType="next" onBlur={onBlur} onChangeText={onChange} value={value} />
 				)}
 			</Field>
 			<Field
@@ -151,7 +154,13 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error.price !== "", msg: error?.price ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Input onBlur={onBlur} onChangeText={onChange} value={value} keyboardType="numeric" />
+					<Input
+						returnKeyType="next"
+						onBlur={onBlur}
+						onChangeText={onChange}
+						value={value}
+						keyboardType="numeric"
+					/>
 				)}
 			</Field>
 			<Field
@@ -161,7 +170,13 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error?.capital !== "", msg: error?.capital ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Input onBlur={onBlur} onChangeText={onChange} value={value} keyboardType="numeric" />
+					<Input
+						returnKeyType="next"
+						onBlur={onBlur}
+						onChangeText={onChange}
+						value={value}
+						keyboardType="numeric"
+					/>
 				)}
 			</Field>
 			<Field
@@ -171,13 +186,22 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error.stock !== "", msg: error?.stock ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Input
-						onBlur={onBlur}
-						onChangeText={onChange}
-						value={value}
-						keyboardType="numeric"
-						style={styles.stock}
-					/>
+					<View className="flex-row gap-2 items-center">
+						<Input
+							returnKeyType="next"
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+							keyboardType="numeric"
+							style={styles.stock}
+						/>
+						<Button size="icon" onPress={() => onChange((Number(value) - 1).toString())}>
+							<ChevronLeft color="white" />
+						</Button>
+						<Button size="icon" onPress={() => onChange((Number(value) + 1).toString())}>
+							<ChevronRight color="white" />
+						</Button>
+					</View>
 				)}
 			</Field>
 			<Field
@@ -188,7 +212,13 @@ export function Form({ product }: { product: DB.Product }) {
 			>
 				{({ onBlur, onChange, value }) => (
 					<View className="flex-row gap-1 items-center">
-						<Input className="flex-1" onBlur={onBlur} onChangeText={onChange} value={value} />
+						<Input
+							returnKeyType="next"
+							className="flex-1"
+							onBlur={onBlur}
+							onChangeText={onChange}
+							value={value}
+						/>
 						<BarcodeScanner onScan={onChange} />
 					</View>
 				)}
@@ -200,7 +230,13 @@ export function Form({ product }: { product: DB.Product }) {
 				error={{ show: error !== null && error.note !== "", msg: error?.note ?? "" }}
 			>
 				{({ onBlur, onChange, value }) => (
-					<Textarea textAlignVertical="top" onBlur={onBlur} onChangeText={onChange} value={value} />
+					<Textarea
+						returnKeyType="done"
+						textAlignVertical="top"
+						onBlur={onBlur}
+						onChangeText={onChange}
+						value={value}
+					/>
 				)}
 			</Field>
 			<View style={styles["button-container"]}>

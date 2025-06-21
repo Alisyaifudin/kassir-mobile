@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/useAction";
 import { useDB } from "@/hooks/useDB";
+import { emitter } from "@/lib/event-emitter";
 import { integer, numeric } from "@/lib/utils";
 import { useRouter } from "expo-router";
+import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import React from "react";
 import {
 	Control,
@@ -91,6 +93,7 @@ export default function Page() {
 			setError({ ...emptyFields, global: errMsg });
 		} else {
 			setError(null);
+			emitter.emit("fetch-products");
 			router.back();
 		}
 	};
@@ -135,13 +138,22 @@ export default function Page() {
 					error={{ show: error !== null && error.stock !== "", msg: error?.stock ?? "" }}
 				>
 					{({ onBlur, onChange, value }) => (
-						<Input
-							onBlur={onBlur}
-							onChangeText={onChange}
-							value={value}
-							keyboardType="numeric"
-							style={styles.stock}
-						/>
+						<View className="flex-row gap-2 items-center">
+							<Input
+								returnKeyType="next"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								keyboardType="numeric"
+								style={styles.stock}
+							/>
+							<Button size="icon" onPress={() => onChange((Number(value) - 1).toString())}>
+								<ChevronLeft color="white" />
+							</Button>
+							<Button size="icon" onPress={() => onChange((Number(value) + 1).toString())}>
+								<ChevronRight color="white" />
+							</Button>
+						</View>
 					)}
 				</Field>
 				<Field
