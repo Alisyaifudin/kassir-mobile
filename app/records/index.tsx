@@ -54,7 +54,7 @@ export default function DetailScreen() {
 		<SafeAreaView style={styles.container}>
 			<TopNav>Riwayat</TopNav>
 			<Nav start={start} setMethods={setMethods} />
-			<View className="p-2 flex-1">
+			<View className="px-2 flex-1">
 				<Await state={state}>
 					{(records) => {
 						return (
@@ -83,10 +83,10 @@ export default function DetailScreen() {
 											}
 											if (method.id === null) {
 												if (method.type === "cash") return r.method === null;
-												if (r.method === null) return false;
-												return methodIds[method.type].includes(r.method);
+												if (r.method_id === null) return false;
+												return methodIds[method.type].includes(r.method_id);
 											}
-											return method.id === r.method;
+											return method.id === r.method_id;
 										});
 									return (
 										<TabsContent key={tab} value={tab} className="flex-1">

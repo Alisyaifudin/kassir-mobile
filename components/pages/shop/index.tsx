@@ -5,8 +5,9 @@ import { ItemProvider, useItemsLocal } from "./use-item";
 import { TopNav } from "./topnav";
 import { modeName } from "@/lib/constants";
 import { List } from "./list";
+import { Product } from "@/database/tables/products";
 
-export function Wrapper({ products, mode }: { products: DB.Product[]; mode: Mode }) {
+export function Wrapper({ products, mode }: { products: Product[]; mode: DB.Mode }) {
 	const { ready, ...ctx } = useItemsLocal(mode, products);
 	if (!ready) {
 		return null;

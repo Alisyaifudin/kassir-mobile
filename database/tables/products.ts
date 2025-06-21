@@ -1,5 +1,13 @@
 import { err, ok, Result } from "@/lib/utils";
-import { type SQLiteDatabase } from "expo-sqlite";
+import { SQLiteRunResult, type SQLiteDatabase } from "expo-sqlite";
+
+export type Product = DB.Product & {
+	capitals: {
+		value: number;
+		id: number;
+		stock: number;
+	}[];
+};
 
 export class ProductTable {
 	#db: SQLiteDatabase;
@@ -7,17 +15,24 @@ export class ProductTable {
 		this.#db = db;
 	}
 	#caches = {
-		all: null as DB.Product[] | null,
+		all: null as Product[] | null,
 	};
 	revalidate(key: "all") {
 		this.#caches[key] = null;
 	}
-	async getAll(): Promise<Result<"Aplikasi bermasalah", DB.Product[]>> {
+	async getAll(): Promise<Result<"Aplikasi bermasalah", Product[]>> {
 		if (this.#caches.all !== null) {
 			return ok(this.#caches.all);
 		}
 		try {
-			const products = await this.#db.getAllAsync<DB.Product>("SELECT * FROM products");
+			const res = await this.#db.getAllAsync<
+				DB.Product & { capital_id: number; capital: number; stock: number }
+			>(
+				`SELECT products.id, products.name, products.price, products.barcode, products.note,
+				        product_capitals.id AS capital_id, product_capitals.value AS capital, product_capitals.stock AS stock
+				 FROM products INNER JOIN capitals ON products.id = product_capitals.product_id`
+			);
+			const products = collectProducts(res);
 			this.#caches.all = products;
 			return ok(products);
 		} catch (error) {
@@ -25,15 +40,19 @@ export class ProductTable {
 			return err("Aplikasi bermasalah");
 		}
 	}
-	async getById(
-		id: number
-	): Promise<Result<"Aplikasi bermasalah" | "Barang tidak ada", DB.Product>> {
+	async getById(id: number): Promise<Result<"Aplikasi bermasalah" | "Barang tidak ada", Product>> {
 		try {
-			const product = await this.#db.getFirstAsync<DB.Product>(
-				"SELECT * FROM products WHERE id = ?",
+			const res = await this.#db.getAllAsync<
+				DB.Product & { capital_id: number; capital: number; stock: number }
+			>(
+				`SELECT products.id, products.name, products.price, products.barcode, products.note,
+				        product_capitals.id AS capital_id, product_capitals.value AS capital, product_capitals.stock AS stock
+				 FROM products INNER JOIN capitals ON products.id = product_capitals.product_id
+				 WHERE product.id = ?`,
 				id
 			);
-			if (product === null) return err("Barang tidak ada");
+			if (res.length === 0) return err("Barang tidak ada");
+			const product = collectProduct(res);
 			return ok(product);
 		} catch (error) {
 			console.error(error);
@@ -64,15 +83,22 @@ export class ProductTable {
 		}
 		try {
 			const res = await this.#db.runAsync(
-				`INSERT INTO products (name, stock, price, barcode, capital, note) 
-			 VALUES ($1, $2, $3, $4, $5, $6)`,
+				`INSERT INTO products (name, price, barcode, note) 
+			   VALUES ($name, $price, $barcode, $note)`,
 				{
-					$1: data.name.trim(),
-					$2: data.stock,
-					$3: data.price,
-					$4: data.barcode === null ? null : data.barcode.trim(),
-					$5: data.capital,
-					$6: data.note,
+					$name: data.name.trim(),
+					$price: data.price,
+					$barcode: data.barcode === null ? null : data.barcode.trim(),
+					$note: data.note,
+				}
+			);
+			const capRes = await this.#db.runAsync(
+				`INSERT INTO product_capitals (product_id, value, stock)
+				 VALUES ($id, $capital, $stock)`,
+				{
+					$id: res.lastInsertRowId,
+					$capital: data.capital,
+					$stock: data.stock,
 				}
 			);
 			if (this.#caches["all"] !== null) {
@@ -80,13 +106,18 @@ export class ProductTable {
 					id: res.lastInsertRowId,
 					name: data.name.trim(),
 					barcode: data.barcode === null ? null : data.barcode.trim(),
-					stock: data.stock,
 					price: data.price,
-					capital: data.capital,
 					note: data.note,
+					capitals: [
+						{
+							id: capRes.lastInsertRowId,
+							stock: data.stock,
+							value: data.capital,
+						},
+					],
 				});
 			}
-			return ok(res.lastInsertRowId)
+			return ok(res.lastInsertRowId);
 		} catch (error) {
 			console.error(error);
 			return err("Aplikasi bermasalah");
@@ -97,10 +128,15 @@ export class ProductTable {
 		data: {
 			name: string;
 			price: number;
-			stock: number;
-			capital: number;
 			barcode: string | null;
 			note: string;
+			capitals: [
+				{
+					id: number;
+					stock: number;
+					value: number;
+				}
+			];
 		}
 	): Promise<"Aplikasi bermasalah" | "Barang sudah ada" | null> {
 		if (data.barcode !== null) {
@@ -117,21 +153,30 @@ export class ProductTable {
 				return "Aplikasi bermasalah";
 			}
 		}
+		const promises: Promise<SQLiteRunResult>[] = [];
 		try {
-			await this.#db.runAsync(
-				`UPDATE products SET name = $name, stock = $stock, price = $price, 
-			 barcode = $barcode, capital = $capital, note = $note 
+			promises.push(
+				this.#db.runAsync(
+					`UPDATE products SET name = $name, price = $price, 
+			 barcode = $barcode, note = $note 
 			 WHERE id = $id`,
-				{
-					$name: data.name.trim(),
-					$stock: data.stock,
-					$price: data.price,
-					$barcode: data.barcode === null ? null : data.barcode.trim(),
-					$capital: data.capital,
-					$note: data.note,
-					$id: id,
-				}
+					{
+						$name: data.name.trim(),
+						$price: data.price,
+						$barcode: data.barcode === null ? null : data.barcode.trim(),
+						$note: data.note,
+						$id: id,
+					}
+				)
 			);
+			for (const cap of data.capitals) {
+				this.#db.runAsync(`UPDATE product_capitals SET value = $value, stock = $stock WHERE id = $id`, {
+					$value: cap.value,
+					$id: cap.id,
+					$stock: cap.stock,
+				});
+			}
+			await Promise.all(promises);
 			if (this.#caches["all"] !== null) {
 				const itemIndex = this.#caches.all.findIndex((p) => p.id === id);
 				if (itemIndex !== -1) {
@@ -139,32 +184,9 @@ export class ProductTable {
 						id: id,
 						name: data.name.trim(),
 						barcode: data.barcode === null ? null : data.barcode.trim(),
-						stock: data.stock,
 						price: data.price,
-						capital: data.capital,
+						capitals: data.capitals,
 						note: data.note,
-					};
-				}
-			}
-			return null;
-		} catch (error) {
-			console.error(error);
-			return "Aplikasi bermasalah";
-		}
-	}
-	async update(mode: Mode, data: { id: number; qty: number }): Promise<"Aplikasi bermasalah" | null> {
-		const sign = mode === "buy" ? "+" : "-"
-		try {
-			await this.#db.runAsync(`UPDATE products SET stock = stock ${sign} $qty WHERE id = $id`, {
-				$qty: data.qty,
-				$id: data.id,
-			});
-			if (this.#caches["all"] !== null) {
-				const itemIndex = this.#caches.all.findIndex((p) => p.id === data.id);
-				if (itemIndex !== -1) {
-					this.#caches.all[itemIndex] = {
-						...this.#caches.all[itemIndex],
-						stock: this.#caches.all[itemIndex].stock + data.qty * (mode === "buy" ? 1 : -1),
 					};
 				}
 			}
@@ -186,4 +208,75 @@ export class ProductTable {
 			return "Aplikasi bermasalah";
 		}
 	}
+}
+
+function collectProducts(
+	res: (DB.Product & {
+		capital_id: number;
+		capital: number;
+		stock: number;
+	})[]
+) {
+	const products: Product[] = [];
+	for (const product of res) {
+		const index = products.findIndex((p) => p.id === product.id);
+		if (index === -1) {
+			products.push({
+				id: product.id,
+				barcode: product.barcode,
+				name: product.name,
+				note: product.note,
+				price: product.price,
+				capitals: [
+					{
+						id: product.capital_id,
+						stock: product.stock,
+						value: product.capital,
+					},
+				],
+			});
+		} else {
+			products[index].capitals.push({
+				id: product.capital_id,
+				stock: product.stock,
+				value: product.capital,
+			});
+		}
+	}
+	return products;
+}
+
+function collectProduct(
+	res: (DB.Product & {
+		capital_id: number;
+		capital: number;
+		stock: number;
+	})[]
+) {
+	let product: Product | null = null;
+	for (const p of res) {
+		if (product === null) {
+			product = {
+				id: p.id,
+				barcode: p.barcode,
+				name: p.name,
+				note: p.note,
+				price: p.price,
+				capitals: [
+					{
+						id: p.capital_id,
+						stock: p.stock,
+						value: p.capital,
+					},
+				],
+			};
+		} else {
+			product.capitals.push({
+				id: p.capital_id,
+				stock: p.stock,
+				value: p.capital,
+			});
+		}
+	}
+	return product!;
 }

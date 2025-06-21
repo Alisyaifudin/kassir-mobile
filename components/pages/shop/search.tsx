@@ -9,8 +9,10 @@ import { useMemo, useState } from "react";
 import { FlatList, View } from "react-native";
 import { useItems } from "./use-item";
 import { ManualBtn } from "./manual";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { Product } from "@/database/tables/products";
 
-export type ProductResult = Pick<DB.Product, "barcode" | "name" | "price" | "id">;
+export type ProductResult = Pick<Product, "barcode" | "name" | "price" | "id" | "capitals">;
 
 export type Result = {
 	terms: string[];
@@ -41,14 +43,14 @@ export function Search({
 	);
 }
 
-export function SearchItems({ products }: { products: DB.Product[] }) {
+export function SearchItems({ products }: { products: Product[] }) {
 	const { set } = useItems();
 	const [value, setValue] = useState("");
 	const [items, setItems] = useState<Result[]>([]);
 	const miniSearch = useMemo(() => {
-		const instance = new MiniSearch<DB.Product>({
+		const instance = new MiniSearch<Product>({
 			fields: ["name", "barcode"],
-			storeFields: ["id", "name", "barcode", "price"],
+			storeFields: ["id", "name", "barcode", "price", "capitals"],
 			idField: "id",
 			searchOptions: {
 				tokenize: (query: string) => query.split(/[\s-&%#*]+/),
@@ -59,7 +61,7 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 		instance.addAll(products);
 		return instance;
 	}, [products]);
-	const debounce = useDebounceCallback((q: string) => {
+	const debounce = useDebounceCallback((q: string, submit: boolean) => {
 		if (q.trim() === "") {
 			setItems([]);
 			return;
@@ -76,10 +78,13 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 			combineWith: "AND",
 		}) as Result[];
 		setItems(items);
+		if (submit && items.length === 1) {
+			handlePress(items[0]);
+		}
 	}, 300);
 	const handleChange = (v: string) => {
 		setValue(v);
-		debounce(v);
+		debounce(v, false);
 	};
 	const handlePress = (item: Result) => {
 		set.items.add({
@@ -87,6 +92,7 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 			id: item.id,
 			name: item.name,
 			price: item.price,
+			capitals: item.capitals
 		});
 		setItems([]);
 		setValue("");
@@ -95,9 +101,14 @@ export function SearchItems({ products }: { products: DB.Product[] }) {
 		if (items.length === 0) return;
 		handlePress(items[0]);
 	};
+	const handleScan = (v: string) => {
+		setValue(v);
+		debounce(v, true);
+	};
 	return (
 		<View className="flex flex-col relative">
 			<View className="flex-row justify-between items-center gap-2">
+				<BarcodeScanner onScan={handleScan} />
 				<Search value={value} onChange={handleChange} onEnter={handleEnter} />
 				<ManualBtn />
 			</View>

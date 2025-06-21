@@ -13,6 +13,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase) {
 		new Migration(1, await loadMigrationFile(require("../assets/migrations/01.sql"))),
 		new Migration(2, await loadMigrationFile(require("../assets/migrations/02.sql"))),
 		new Migration(3, await loadMigrationFile(require("../assets/migrations/03.sql"))),
+		new Migration(4, await loadMigrationFile(require("../assets/migrations/04.sql"))),
 	];
 	const DATABASE_VERSION = migrations.length;
 	let version = await db.getFirstAsync<{ user_version: number }>("PRAGMA user_version");

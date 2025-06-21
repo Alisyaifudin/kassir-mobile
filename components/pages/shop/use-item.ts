@@ -18,8 +18,14 @@ const itemSchema = z.object({
 	name: z.string().min(1),
 	price: z.number(),
 	qty: z.number().int(),
-	stock: z.number().int().optional(),
 	barcode: z.string().nullable(),
+	capitals: z.array(
+		z.object({
+			id: z.number().int(),
+			stock: z.number().int(),
+			value: z.number(),
+		})
+	),
 	discs: discSchema.array(),
 });
 
@@ -34,7 +40,7 @@ export type Item = z.infer<typeof itemSchema>;
 export type Disc = z.infer<typeof discSchema>;
 export type Additional = z.infer<typeof additionalSchema>;
 
-export function useItemsLocal(mode: Mode, products: DB.Product[]) {
+export function useItemsLocal(mode: DB.Mode, products: DB.Product[]) {
 	const [ready, setReady] = useState(false);
 	const [items, setItems] = useState<Item[]>([]);
 	const [additionals, setAdditionals] = useState<Additional[]>([]);
@@ -67,7 +73,13 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 			setItems(rest);
 			setItemsLocal(mode, rest);
 		},
-		add: (added: { id: number; price: number; name: string; barcode: string | null }) => {
+		add: (added: {
+			id: number;
+			price: number;
+			name: string;
+			barcode: string | null;
+			capitals: { value: number; id: number; stock: number }[];
+		}) => {
 			const index = items.findIndex(
 				(i) => i.id === added.id || (i.barcode !== null && i.barcode === added.barcode)
 			);
@@ -104,7 +116,13 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 				return "Barang dengan barcode tersebut sudah ada";
 			}
 			const key = items.length > 0 ? Math.max(...items.map((a) => a.key)) + 1 : 0;
-			const item: Item = { id: null, ...added, discs: [], key };
+			const item: Item = {
+				id: null,
+				...added,
+				discs: [],
+				key,
+				capitals: [{ id: -1, stock: added.stock, value: 0 }],
+			};
 			setItems((prev) =>
 				produce(prev, (draft) => {
 					draft.push(item);
@@ -333,7 +351,7 @@ export function useItemsLocal(mode: Mode, products: DB.Product[]) {
 
 const ItemContext = createContext<null | {
 	reset: () => void;
-	mode: Mode;
+	mode: DB.Mode;
 	items: Item[];
 	additionals: Additional[];
 	fix: number;
@@ -358,7 +376,13 @@ const ItemContext = createContext<null | {
 			remove: (index: number) => void;
 		};
 		items: {
-			add: (added: { id: number; price: number; name: string; barcode: string | null }) => void;
+			add: (added: {
+				id: number;
+				price: number;
+				name: string;
+				barcode: string | null;
+				capitals: { value: number; id: number; stock: number }[];
+			}) => void;
 			addManual: (added: {
 				qty: number;
 				stock: number;
@@ -391,7 +415,7 @@ export function useItems() {
 	return ctx;
 }
 
-async function getItemsLocal(mode: Mode): Promise<Item[]> {
+async function getItemsLocal(mode: DB.Mode): Promise<Item[]> {
 	try {
 		const raw = await AsyncStorage.getItem(`${mode}-items`);
 		if (raw === null) return [];
@@ -405,7 +429,7 @@ async function getItemsLocal(mode: Mode): Promise<Item[]> {
 	}
 }
 
-async function setItemsLocal(mode: Mode, items: Item[]) {
+async function setItemsLocal(mode: DB.Mode, items: Item[]) {
 	try {
 		const json = JSON.stringify(items);
 		await AsyncStorage.setItem(`${mode}-items`, json);
@@ -414,7 +438,7 @@ async function setItemsLocal(mode: Mode, items: Item[]) {
 	}
 }
 
-async function getAdditionals(mode: Mode): Promise<Additional[]> {
+async function getAdditionals(mode: DB.Mode): Promise<Additional[]> {
 	try {
 		const raw = await AsyncStorage.getItem(`${mode}-additionals`);
 		if (raw === null) return [];
@@ -429,7 +453,7 @@ async function getAdditionals(mode: Mode): Promise<Additional[]> {
 	}
 }
 
-async function setAdditionalsLocal(mode: Mode, additionals: Additional[]) {
+async function setAdditionalsLocal(mode: DB.Mode, additionals: Additional[]) {
 	try {
 		const json = JSON.stringify(additionals);
 		await AsyncStorage.setItem(`${mode}-additionals`, json);

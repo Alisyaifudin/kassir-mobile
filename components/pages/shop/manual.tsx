@@ -18,6 +18,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { useItems } from "./use-item";
 import { Field } from "./field";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
 
 const tabSchema = z.enum(["manual", "additional"]);
 
@@ -149,7 +150,10 @@ function ManualForm({
 					error={{ show: error.barcode !== "", msg: error.barcode }}
 				>
 					{({ onBlur, onChange, value }) => (
-						<Input onBlur={onBlur} onChangeText={onChange} value={value} />
+						<View className="flex-row items-center gap-1">
+							<BarcodeScanner onScan={onChange} />
+							<Input className="flex-1" onBlur={onBlur} onChangeText={onChange} value={value} />
+						</View>
 					)}
 				</Field>
 				<Field

@@ -1,4 +1,3 @@
-import { TextError } from "@/components/TextError";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,10 +5,7 @@ import { Text } from "@/components/ui/text";
 import { numeric } from "@/lib/utils";
 import { useState } from "react";
 import {
-	Control,
 	Controller,
-	ControllerRenderProps,
-	Path,
 	SubmitHandler,
 	useForm,
 } from "react-hook-form";

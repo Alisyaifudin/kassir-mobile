@@ -24,7 +24,7 @@ export class AdditionalTable {
 	async getAllByTime(timestamp: number): Promise<Result<"Aplikasi bermasalah", DB.Additional[]>> {
 		try {
 			const res = await this.#db.getAllAsync<DB.Additional>(
-				`SELECT * FROM additionals WHERE timestamp = $timestamp ORDER BY timestamp DESC`,
+				`SELECT * FROM additionals WHERE timestamp = $timestamp`,
 				{ $timestamp: timestamp }
 			);
 			return ok(res);

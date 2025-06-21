@@ -6,6 +6,21 @@ export class RecordTable {
 	constructor(db: SQLiteDatabase) {
 		this.#db = db;
 	}
+	async getByTime(
+		timestamp: number
+	): Promise<Result<"Aplikasi bermasalah" | "Catatan tidak ada", DB.Record>> {
+		try {
+			const res = await this.#db.getFirstAsync<DB.Record>(
+				`SELECT * FROM records WHERE timestamp = ?`,
+				timestamp
+			);
+			if (res === null) return err("Catatan tidak ada");
+			return ok(res);
+		} catch (error) {
+			console.error(error);
+			return err("Aplikasi bermasalah");
+		}
+	}
 	async getByRange(
 		start: number,
 		end: number
@@ -14,18 +29,6 @@ export class RecordTable {
 			const res = await this.#db.getAllAsync<DB.Record>(
 				`SELECT * FROM records WHERE timestamp BETWEEN $start AND $end ORDER BY timestamp DESC`,
 				{ $start: start, $end: end }
-			);
-			return ok(res);
-		} catch (error) {
-			console.error(error);
-			return err("Aplikasi bermasalah");
-		}
-	}
-	async getAllByTime(timestamp: number): Promise<Result<"Aplikasi bermasalah", DB.Record[]>> {
-		try {
-			const res = await this.#db.getAllAsync<DB.Record>(
-				`SELECT * FROM records WHERE timestamp = $timestamp ORDER BY timestamp DESC`,
-				{ $timestamp: timestamp }
 			);
 			return ok(res);
 		} catch (error) {
@@ -49,16 +52,16 @@ export class RecordTable {
 		}
 	}
 	async add(
-		mode: Mode,
+		mode: DB.Mode,
 		timestamp: number,
 		data: Omit<DB.Record, "id" | "mode">
 	): Promise<"Aplikasi bermasalah" | null> {
 		try {
 			await this.#db.runAsync(
 				`INSERT INTO records (timestamp, total_from_items, total_additional, disc_val, 
-				 disc_eff_val, disc_kind, rounding, credit, mode, pay, method, note, cashier, pay)
+				 disc_eff_val, disc_kind, rounding, paid_at, mode, pay, method, note, cashier, pay)
 				 VALUES ($timestamp, $total_from_items, $total_additional, $disc_val, $disc_eff_val, 
-				 $disc_kind, $rounding, $credit, $mode, $pay, $method, $note, $cashier, $pay)`,
+				 $disc_kind, $rounding, $paid_at, $mode, $pay, $method, $note, $cashier, $pay)`,
 				{
 					$timestamp: timestamp,
 					$total_from_items: data.total_from_items,
@@ -67,7 +70,7 @@ export class RecordTable {
 					$disc_eff_val: data.disc_eff_val,
 					$disc_kind: data.disc_kind,
 					$rounding: data.rounding,
-					$credit: data.credit,
+					$paid_at: data.paid_at,
 					$mode: mode,
 					$method: data.method,
 					$note: data.note,

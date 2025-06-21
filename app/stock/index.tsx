@@ -3,6 +3,7 @@ import { FAB } from "@/components/Fab";
 import { Item } from "@/components/pages/stock";
 import { Search } from "@/components/pages/stock/search";
 import { TopNav } from "@/components/TopNav";
+import { Product } from "@/database/tables/products";
 import { useProducts } from "@/hooks/useProducts";
 import { useProductSearch } from "@/hooks/useProductSearch";
 import { emitter } from "@/lib/event-emitter";
@@ -41,7 +42,7 @@ function Wrapper({
 	refreshing,
 	onRefresh,
 }: {
-	products: DB.Product[];
+	products: Product[];
 	refreshing: boolean;
 	onRefresh: () => void;
 }) {
@@ -85,7 +86,7 @@ function Wrapper({
 			<Search query={query ?? ""} setQuery={setQuery} />
 			<FlatList
 				data={products}
-				renderItem={({ item }) => <Item {...item} />}
+				renderItem={({ item }) => <Item item={item} />}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerStyle={{
 					paddingBottom: 100,

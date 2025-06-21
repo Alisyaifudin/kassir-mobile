@@ -34,7 +34,7 @@ export class DiscountTable {
 	}
 	async addMany(
 		itemId: number,
-		discounts: { value: number; kind: DiscKind; effValue: number }[]
+		discounts: { value: number; kind: DB.DiscKind; effValue: number }[]
 	): Promise<"Aplikasi bermasalah" | null> {
 		if (discounts.length === 0) {
 			console.error("Empty discounts");

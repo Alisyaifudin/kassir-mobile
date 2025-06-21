@@ -1,12 +1,22 @@
 declare namespace DB {
+	type Role = "admin" | "manager" | "user";
+	type DiscKind = "number" | "percent";
+	type Mode = "buy" | "sell";
+	type Method = "cash" | "transfer" | "debit" | "qris";
+	type MoneyKind = "saving" | "debt";
+
 	interface Product {
 		id: number;
 		name: string;
 		price: number;
-		stock: number;
 		barcode: string | null;
-		capital: number;
 		note: string;
+	}
+	interface ProductCapital {
+		id: number;
+		product_id: number;
+		value: number;
+		stock: number;
 	}
 	interface Image {
 		uri: string;
@@ -19,43 +29,47 @@ declare namespace DB {
 		height: number;
 		created_at: number;
 	}
-	type Method = "cash" | "transfer" | "debit" | "qris";
+	interface Cashier {
+		id: number;
+		name: string;
+		role: Role;
+		hash: string;
+	}
 	interface MethodType {
 		id: number;
 		name: string;
 		label: string;
 		method: Method;
 	}
-	interface Cashier {
-		id: number;
-		name: string;
-		role: Role;
-		password: string;
-	}
 	interface Record {
 		timestamp: number;
 		total_from_items: number;
-		total_additional: number;
 		disc_val: number;
 		disc_eff_val: number;
 		disc_kind: DiscKind;
+		total_additional: number;
 		rounding: number;
-		credit: 0 | 1;
 		mode: Mode;
 		pay: number;
-		method: number | null; // method_type id
+		method: Method;
+		method_id: number | null; // method_type id
 		note: string;
 		cashier: string;
+		paid_at: number | null;
 	}
 	interface RecordItem {
 		id: number;
 		timestamp: number;
 		name: string;
 		price: number;
-		qty: number;
 		disc_val: number;
-		capital: number;
-		product_id: number | null;
+		product_id: number;
+	}
+	interface RecordItemCapital {
+		id: number;
+		record_item_id: number;
+		value: number;
+		qty: number;
 	}
 	interface Additional {
 		id: number;
@@ -72,22 +86,17 @@ declare namespace DB {
 		kind: DiscKind;
 		eff_value: number;
 	}
-	type MoneyKind = "saving" | "debt";
-	interface Money {
-		timestamp: number;
-		value: number;
-		kind: MoneyKind;
-	}
 	interface Social {
 		id: number;
 		name: string;
 		value: string;
 	}
+	interface Money {
+		timestamp: number;
+		value: number;
+		kind: MoneyKind;
+	}
 }
-
-type Mode = "buy" | "sell";
-type Role = "admin" | "manager" | "user";
-type DiscKind = "number" | "percent";
 
 declare module "*.sql" {
 	const content: string;

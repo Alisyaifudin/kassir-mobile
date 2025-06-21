@@ -9,6 +9,8 @@ import { MoneyTable } from "./tables/money";
 import { RecordItemTable } from "./tables/record-items";
 import { RecordTable } from "./tables/records";
 import { SocialTable } from "./tables/socials";
+import { ProductCapitalTable } from "./tables/product-capitals";
+import { RecordItemCapitalTable } from "./tables/record-item-capitals";
 
 export function generateDB(db: SQLiteDatabase) {
 	return {
@@ -19,10 +21,12 @@ export function generateDB(db: SQLiteDatabase) {
 		money: new MoneyTable(db),
 		productImage: new ProductImageTable(db),
 		product: new ProductTable(db),
+		productCapital: new ProductCapitalTable(db),
 		recordItem: new RecordItemTable(db),
+		recordItemCapital: new RecordItemCapitalTable(db),
 		record: new RecordTable(db),
 		social: new SocialTable(db),
-		raw: db
+		raw: db,
 	};
 }
 

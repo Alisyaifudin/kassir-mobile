@@ -26,6 +26,8 @@ import { TextError } from "@/components/TextError";
 import { Show } from "@/components/Show";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/components/Auth";
+import { useState } from "react";
+import { Temporal } from "temporal-polyfill";
 
 const numeric = z
 	.string()
@@ -52,6 +54,7 @@ const emptyFields = {
 
 export function SummaryBtn({ methods }: { methods: DB.MethodType[] }) {
 	const { items, additionals, fix, disc, set, mode, reset } = useItems();
+	const [open, setOpen] = useState(false);
 	const { control, handleSubmit, watch } = useForm<Inputs>({
 		defaultValues: { ...emptyFields, method: null, discKind: "percent" },
 	});
@@ -63,65 +66,73 @@ export function SummaryBtn({ methods }: { methods: DB.MethodType[] }) {
 		(record: {
 			fix: number;
 			round: number;
-			method: number | null;
+			methodId: number | null;
+			method: DB.Method;
 			pay: number;
 			discVal: number;
-			credit: 0 | 1;
-			discKind: DiscKind;
+			paidAt: number | null;
+			discKind: DB.DiscKind;
 			note: string;
 			cashier: string;
 		}) => submit(db, mode, items, additionals, record)
 	);
 	const onSubmit =
-		(credit: 0 | 1): SubmitHandler<Inputs> =>
+		(credit: boolean): SubmitHandler<Inputs> =>
 		async (raw) => {
 			if (loading) return;
 			const parsed = z
 				.object({
 					round: numeric,
-					method: z.number().int().nullable(),
+					methodId: z.number().int().nullable(),
+					method: z.enum(["cash", "transfer", "debit", "qris"]),
 					pay: numeric,
 					discVal: numeric,
 				})
 				.safeParse({
 					round: raw.round,
-					method: raw.method?.id ?? null,
+					methodId: raw.method?.id ?? null,
+					method: raw.method?.name ?? "cash",
 					pay: raw.pay,
 					discVal: raw.discVal,
 				});
 
 			if (!parsed.success) {
 				const errs = parsed.error.flatten().fieldErrors;
-				console.log(errs);
 				setError({
 					global: "",
 					round: errs.round?.join(";") ?? "",
 					discVal: errs.discVal?.join(";") ?? "",
-					method: errs.method?.join(";") ?? "",
+					// TODO: METHOD ID ERRORS?
+					method: errs.methodId?.join(";") ?? "",
 					pay: errs.pay?.join(";") ?? "",
 				});
 				return;
 			}
-			const { pay, discVal, method, round } = parsed.data;
+			const { pay, discVal, methodId, method, round } = parsed.data;
 			const { discKind, note } = raw;
+			const now = Temporal.Now.instant().epochMilliseconds;
 			const record = {
 				fix,
 				round,
+				methodId,
 				method,
 				pay,
 				discVal,
 				discKind,
-				credit,
+				paidAt: credit ? null : now,
 				note,
 				cashier: session.name,
 			};
-
 			const [errMsg, timestamp] = await action(record);
 			if (errMsg) {
 				setError({ ...emptyFields, global: errMsg });
 			} else {
 				reset();
-				router.back();
+				setOpen(false);
+				router.push({
+					pathname: "/records/[timestamp]",
+					params: { timestamp: timestamp.toString() },
+				});
 			}
 		};
 	const { totalBeforeAdds } = calcTotalBeforeAdds(items, disc, fix);
@@ -131,7 +142,7 @@ export function SummaryBtn({ methods }: { methods: DB.MethodType[] }) {
 	const pay = isNaN(Number(watch("pay"))) ? 0 : Number(watch("pay"));
 	const change = total.times(-1).add(pay).toNumber();
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
 			<DialogTrigger asChild>
 				<Button className="native:py-0">
 					<Text className="native:text-xl">Bayar</Text>
@@ -252,8 +263,9 @@ export function SummaryBtn({ methods }: { methods: DB.MethodType[] }) {
 					</Field>
 				</DialogHeader>
 				<DialogFooter className="flex flex-row justify-end">
+					{/* TODO: ADD CREDIT BUTTON */}
 					<Button
-						onPress={handleSubmit(onSubmit(0))}
+						onPress={handleSubmit(onSubmit(false))}
 						disabled={change < 0 && loading}
 						className="flex flex-row gap-2 items-center"
 					>

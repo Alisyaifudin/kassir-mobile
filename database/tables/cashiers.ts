@@ -56,7 +56,7 @@ export class CashierTable {
 					return "Aplikasi bermasalah";
 				}
 			},
-			async role(id: number, role: Role): Promise<"Aplikasi bermasalah" | null> {
+			async role(id: number, role: DB.Role): Promise<"Aplikasi bermasalah" | null> {
 				try {
 					await this.db.runAsync("UPDATE cashiers SET role = $role WHERE id = $id", {
 						$id: id,
@@ -82,7 +82,7 @@ export class CashierTable {
 	async insert(cashier: {
 		name: string;
 		password: string;
-		role: Role;
+		role: DB.Role;
 	}): Promise<Result<"Aplikasi bermasalah", number>> {
 		try {
 			const hash = await crypt.hash(cashier.password);

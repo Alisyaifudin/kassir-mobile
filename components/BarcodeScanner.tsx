@@ -11,7 +11,7 @@ export function BarcodeScanner({ onScan }: { onScan: (v: string) => void }) {
 	return (
 		<Dialog open={open} onOpenChange={(open) => setOpen(open)}>
 			<DialogTrigger asChild>
-				<Button variant="outline">
+				<Button variant="outline" size="icon">
 					<ScanBarcode />
 				</Button>
 			</DialogTrigger>

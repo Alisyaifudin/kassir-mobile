@@ -1,35 +1,41 @@
+import { TextError } from "@/components/TextError";
+import { Product } from "@/database/tables/products";
 import { COLOR } from "@/lib/constants";
 import { Link } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
-export function Item({ name, price, id, capital, barcode, stock }: DB.Product) {
+export function Item({ item }: { item: Product }) {
+	if (item.capitals.length === 0) {
+		return <TextError>Kosong</TextError>;
+	}
+	const totalStock = item.capitals.map((c) => c.stock).reduce((prev, cur) => cur + prev);
 	return (
 		<Link
 			href={{
 				pathname: "/stock/[id]",
-				params: { id },
+				params: { id: item.id },
 			}}
 			style={styles.root}
 		>
 			<View>
 				<Text selectable style={styles.name}>
-					{name}
+					{item.name}
 				</Text>
 				<View style={styles.desc}>
 					<View style={styles.prices}>
-						<Text selectable>Harga: {price.toLocaleString("id-ID")}</Text>
+						<Text selectable>Harga: {item.price.toLocaleString("id-ID")}</Text>
 					</View>
 					<View style={styles.prices}>
-						<Text selectable>Modal: {capital.toLocaleString("id-ID")}</Text>
+						<Text selectable>Modal: {item.capit als[0].value.toLocaleString("id-ID")}</Text>
 					</View>
 					<View style={styles["stock-container"]}>
 						<Text selectable style={styles.stock}>
-							Stok: {stock.toLocaleString("id-ID")}
+							Stok: {totalStock.toLocaleString("id-ID")}
 						</Text>
 					</View>
 				</View>
 				<View style={styles.link}>
-					<Text selectable>Barcode: {barcode}</Text>
+					<Text selectable>Barcode: {item.barcode}</Text>
 				</View>
 			</View>
 		</Link>
@@ -66,7 +72,7 @@ const styles = StyleSheet.create({
 		width: "20%",
 		display: "flex",
 		justifyContent: "flex-end",
-    paddingRight: 5,
+		paddingRight: 5,
 	},
 	stock: {
 		textAlign: "right",
